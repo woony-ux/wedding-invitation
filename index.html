@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>함정훈 ♥ 박운진</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --cream:    #F4EFE2;
+      --ink:      #18140E;
+      --ink-m:    #524C44;
+      --ink-l:    #9A9288;
+      --border:   #D6CCBC;
+      --white:    #FDFAF3;
+      --solo-bg:  #0C0A18;
+      --solo-pk:  #FF3D6B;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      max-width: 480px;
+      margin: 0 auto;
+      overflow-x: hidden;
+    }
+
+    /* ── 스크롤 리빌 ─────────────────────────────── */
+    .reveal { opacity: 0; transform: translateY(22px); transition: opacity .9s ease, transform .9s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── 모달 ──────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(24,20,14,.5);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 2000; padding: 24px;
+      opacity: 0; pointer-events: none; transition: opacity .3s;
+    }
+    .modal-overlay.show { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--white); border-radius: 4px; padding: 36px 28px;
+      text-align: center; max-width: 320px; width: 100%;
+      transform: scale(.95); transition: transform .3s;
+      border: 1px solid var(--border);
+    }
+    .modal-overlay.show .modal { transform: scale(1); }
+    .modal-icon  { font-size: 44px; margin-bottom: 12px; display: block; }
+    .modal-title { font-family: 'Noto Serif KR', serif; font-size: 18px; color: var(--ink); margin-bottom: 10px; font-weight: 300; }
+    .modal-body  { font-size: 13px; color: var(--ink-m); line-height: 1.9; margin-bottom: 22px; white-space: pre-line; word-break: keep-all; }
+    .btn-modal-close {
+      padding: 11px 32px; background: var(--ink); color: var(--cream);
+      border: none; border-radius: 2px; font-size: 13px;
+      font-family: 'Noto Sans KR', sans-serif; cursor: pointer; letter-spacing: 1px;
+    }
+
+    /* ── HERO ──────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      background: var(--cream);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 80px 32px 100px;
+      position: relative; overflow: hidden;
+    }
+
+    /* 사진 */
+    .photo-frame {
+      width: 200px; height: 260px;
+      border-radius: 100px 100px 4px 4px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin-bottom: 32px;
+    }
+    .photo-frame img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-placeholder {
+      width: 100%; height: 100%;
+      background: var(--white);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 8px; color: var(--ink-l); font-size: 13px;
+    }
+
+    /* 이름 */
+    .hero-names-en {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-size: 14px;
+      letter-spacing: 4px; color: var(--ink-l);
+      margin-bottom: 10px; text-transform: uppercase;
+    }
+    .hero-names {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 32px; font-weight: 300;
+      letter-spacing: 8px; color: var(--ink);
+      text-align: center; line-height: 1.4;
+    }
+    .hero-names em { font-style: normal; font-size: 18px; margin: 0 8px; opacity: .4; }
+    .hero-date {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 16px; letter-spacing: 4px;
+      color: var(--ink-m); margin-top: 14px;
+    }
+
+    /* 카운트다운 */
+    .countdown {
+      display: flex; gap: 6px; align-items: flex-start;
+      margin-top: 32px;
+    }
+    .cd-item { text-align: center; min-width: 48px; }
+    .cd-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 38px; font-weight: 300;
+      color: var(--ink); line-height: 1;
+    }
+    .cd-lbl { font-size: 9px; color: var(--ink-l); margin-top: 3px; letter-spacing: 2px; }
+    .cd-sep { font-size: 28px; color: var(--border); margin-top: 2px; font-weight: 300; }
+
+    /* 일러스트레이션 */
+    .hero-illus {
+      width: 100%; max-width: 320px;
+      margin-top: 40px; opacity: .8;
+    }
+
+    .scroll-hint {
+      position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-size: 12px;
+      color: var(--ink-l); letter-spacing: 3px;
+      animation: nudge 2.5s infinite;
+    }
+    @keyframes nudge {
+      0%,100% { transform: translateX(-50%) translateY(0); }
+      50%      { transform: translateX(-50%) translateY(-6px); }
+    }
+
+    /* ── 구분선 ─────────────────────────────────────── */
+    .thin-line {
+      width: 100%; height: 1px;
+      background: var(--border);
+      border: none; margin: 0;
+    }
+    .section-rule {
+      display: flex; align-items: center; gap: 16px;
+      padding: 0 32px; margin: 0;
+    }
+    .section-rule::before, .section-rule::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+    .section-rule span {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-size: 13px;
+      color: var(--ink-l); letter-spacing: 2px; white-space: nowrap;
+    }
+
+    /* ── 공통 섹션 ─────────────────────────────────── */
+    .sec { padding: 64px 32px; }
+    .sec-cream { background: var(--cream); }
+    .sec-white { background: var(--white); }
+
+    .sec-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 13px; font-weight: 300;
+      letter-spacing: 5px; text-align: center;
+      color: var(--ink-m); margin-bottom: 48px;
+      text-transform: uppercase;
+    }
+    .sec-title-en {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-size: 26px;
+      color: var(--ink); text-align: center;
+      margin-top: 4px; display: block;
+    }
+
+    /* ── 청첩 본문 ─────────────────────────────────── */
+    .invite-ko {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-size: 14px;
+      letter-spacing: 4px; color: var(--ink-l);
+      text-align: center; margin-bottom: 16px;
+    }
+    .invite-headline {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 26px; font-weight: 300;
+      letter-spacing: 6px; text-align: center;
+      color: var(--ink); margin-bottom: 44px;
+    }
+    .invite-text {
+      font-size: 13.5px; line-height: 2.5;
+      color: var(--ink-m); text-align: center;
+      word-break: keep-all; font-weight: 300;
+    }
+    .invite-parents {
+      margin-top: 48px; font-size: 12.5px;
+      color: var(--ink-m); text-align: center; line-height: 2.4;
+      letter-spacing: .5px;
+    }
+    .invite-parents strong { color: var(--ink); font-weight: 400; }
+
+    /* 파티 카드 */
+    .party-card {
+      margin-top: 48px;
+      border: 1px solid var(--border);
+      padding: 28px 24px; text-align: center;
+      position: relative;
+    }
+    .party-card::before {
+      content: 'PARTY NOTE';
+      position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+      background: var(--white); padding: 0 12px;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-size: 11px;
+      letter-spacing: 3px; color: var(--ink-l);
+    }
+    .party-text {
+      font-size: 13.5px; line-height: 2.4; color: var(--ink-m);
+      word-break: keep-all; font-weight: 300;
+    }
+    .party-text strong { color: var(--ink); font-weight: 500; }
+
+    /* ── 예식 안내 ─────────────────────────────────── */
+    .detail-list { display: flex; flex-direction: column; gap: 0; }
+    .detail-row {
+      display: flex; align-items: flex-start; gap: 20px;
+      padding: 22px 0; border-bottom: 1px solid var(--border);
+    }
+    .detail-row:first-child { border-top: 1px solid var(--border); }
+    .d-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-size: 11px;
+      letter-spacing: 2px; color: var(--ink-l);
+      min-width: 80px; padding-top: 2px;
+      text-transform: uppercase;
+    }
+    .d-val {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 15px; font-weight: 300;
+      color: var(--ink); line-height: 1.7; flex: 1;
+    }
+    .d-sub { font-family: 'Noto Sans KR', sans-serif; font-size: 12px; color: var(--ink-l); margin-top: 3px; font-weight: 300; }
+
+    .lucky-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px;
+      border: 1px solid var(--ink);
+      font-size: 11px; letter-spacing: 1px; color: var(--ink);
+      margin-top: 6px; font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+    }
+
+    /* ── 지도 ──────────────────────────────────────── */
+    .map-box {
+      width: 100%;
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+      overflow: hidden;
+      border-radius: 2px;
+    }
+
+    .btn-map {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; padding: 15px; border-radius: 2px;
+      font-family: 'Noto Sans KR', sans-serif; font-size: 14px;
+      cursor: pointer; text-decoration: none; margin-bottom: 10px;
+      transition: opacity .2s; border: none; font-weight: 400;
+    }
+    .btn-map:active { opacity: .8; }
+    .btn-naver { background: #03C75A; color: white; }
+    .btn-kakao { background: #FEE500; color: #3A1D1D; }
+
+    .transport {
+      margin-top: 20px; padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .t-row { display: flex; gap: 16px; font-size: 13px; line-height: 1.9; margin-bottom: 12px; font-weight: 300; color: var(--ink-m); }
+    .t-row:last-child { margin-bottom: 0; }
+    .t-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-size: 11px;
+      letter-spacing: 1.5px; color: var(--ink-l);
+      min-width: 36px; padding-top: 3px;
+      text-transform: uppercase;
+    }
+
+    /* ══════════════════════════════════════════════════
+       나는 솔로 — TV 쇼 스타일
+    ══════════════════════════════════════════════════ */
+    .solo-sec { background: var(--solo-bg); position: relative; overflow: hidden; }
+
+    .solo-intro {
+      padding: 64px 28px 40px; text-align: center;
+      background: linear-gradient(180deg, #1A0830 0%, #0C0A18 100%);
+      position: relative;
+    }
+    .stars-bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .star-dot { position: absolute; background: white; border-radius: 50%; animation: twinkle 3s ease-in-out infinite; }
+    @keyframes twinkle { 0%,100% { opacity: .12; } 50% { opacity: .8; } }
+
+    .solo-logo {
+      display: inline-flex; align-items: baseline; gap: 5px; margin-bottom: 14px;
+    }
+    .solo-naneun {
+      font-family: 'Noto Serif KR', serif; font-size: 20px;
+      color: rgba(255,255,255,.8); font-weight: 300;
+    }
+    .solo-word {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 30px; font-weight: 900;
+      color: var(--solo-pk); letter-spacing: -1px;
+      text-shadow: 0 0 18px rgba(255,61,107,.45);
+    }
+    .solo-official {
+      display: inline-block; padding: 4px 14px; margin-bottom: 20px;
+      border: 1px solid rgba(255,61,107,.45);
+      font-size: 10px; color: var(--solo-pk);
+      letter-spacing: 2px; border-radius: 2px;
+    }
+    .solo-sub {
+      font-size: 13.5px; color: rgba(255,255,255,.7);
+      line-height: 2; word-break: keep-all;
+    }
+    .solo-sub strong { color: #FFD580; font-weight: 500; }
+
+    /* 카드 */
+    .solo-cards-label {
+      font-size: 10px; color: rgba(255,255,255,.35);
+      letter-spacing: 3px; text-align: center;
+      padding: 8px 28px 16px;
+    }
+    .solo-cards-wrap {
+      display: flex; gap: 0; overflow-x: auto;
+      padding: 0 16px; scrollbar-width: none;
+    }
+    .solo-cards-wrap::-webkit-scrollbar { display: none; }
+    .solo-cards-wrap::after { content: ''; flex-shrink: 0; width: 8px; }
+
+    .s-card {
+      flex-shrink: 0; width: 210px; margin-right: 10px;
+      border-radius: 8px; overflow: hidden;
+      background: linear-gradient(180deg, #1E1030 0%, #2A1548 60%, #180D28 100%);
+      border: 1px solid rgba(255,255,255,.1);
+    }
+    .s-card::before {
+      content: ''; display: block; position: absolute; inset: 0;
+      background: radial-gradient(circle at 70% 30%, rgba(255,61,107,.12) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .s-card-top {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; padding: 10px 12px 0;
+    }
+    .s-show-logo {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 12px; color: rgba(255,255,255,.55); font-weight: 300;
+    }
+    .s-show-logo b {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 900; color: var(--solo-pk); font-size: 13px; font-style: normal;
+    }
+    .s-brand { font-size: 9px; color: rgba(255,255,255,.3); letter-spacing: .5px; text-align: right; line-height: 1.5; }
+    .s-card-body { padding: 10px 14px 18px; }
+    .s-avatar {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: linear-gradient(135deg, rgba(255,61,107,.5), rgba(140,70,180,.5));
+      border: 1.5px solid rgba(255,255,255,.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; margin-bottom: 10px;
+    }
+    .s-tagline {
+      font-size: 11px; color: rgba(255,255,255,.55);
+      font-style: italic; line-height: 1.65; margin-bottom: 8px;
+    }
+    .s-tagline .hl { color: var(--solo-pk); font-style: normal; font-weight: 700; }
+    .s-name {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 20px; font-weight: 900; color: white; margin-bottom: 3px;
+    }
+    .s-info { font-size: 11px; color: rgba(255,255,255,.45); margin-bottom: 6px; }
+    .s-mbti {
+      display: inline-block; padding: 2px 8px;
+      border: 1px solid rgba(255,61,107,.45);
+      border-radius: 2px; font-size: 10px; color: #FF8CA8; margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+    .s-intro { font-size: 11px; color: rgba(255,255,255,.6); line-height: 1.65; }
+
+    /* 폼 */
+    .solo-form-wrap { padding: 24px 20px 64px; }
+    .solo-form {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 4px; padding: 28px 20px;
+    }
+    .solo-form-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 20px; font-weight: 300;
+      color: #FFD580; text-align: center; margin-bottom: 4px;
+      letter-spacing: 4px;
+    }
+    .solo-form-sub { font-size: 11px; color: rgba(255,255,255,.4); text-align: center; margin-bottom: 24px; letter-spacing: 1px; }
+    .fg { margin-bottom: 14px; }
+    .fg-label { display: block; font-size: 10px; color: rgba(255,255,255,.45); letter-spacing: 2px; margin-bottom: 7px; text-transform: uppercase; }
+    .fg-input, .fg-textarea {
+      width: 100%; padding: 13px 14px;
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.15);
+      border-radius: 2px; font-family: 'Noto Sans KR', sans-serif;
+      font-size: 14px; color: white; outline: none; transition: border-color .2s;
+      -webkit-appearance: none;
+    }
+    .fg-input::placeholder, .fg-textarea::placeholder { color: rgba(255,255,255,.25); }
+    .fg-input:focus, .fg-textarea:focus { border-color: var(--solo-pk); }
+    .fg-textarea { resize: none; min-height: 88px; line-height: 1.65; }
+    .fg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .radio-group { display: flex; gap: 20px; }
+    .radio-label {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13.5px; color: rgba(255,255,255,.75); cursor: pointer;
+    }
+    .radio-label input { accent-color: var(--solo-pk); width: 15px; height: 15px; }
+    .btn-solo {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 16px;
+      background: var(--solo-pk); color: white;
+      border: none; border-radius: 2px;
+      font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700;
+      cursor: pointer; margin-top: 8px; letter-spacing: 1px;
+      transition: opacity .2s;
+    }
+    .btn-solo:hover { opacity: .9; }
+
+    /* ── 푸터 ──────────────────────────────────────── */
+    .footer {
+      padding: 64px 32px 56px;
+      background: var(--ink); color: rgba(255,255,255,.6);
+      text-align: center;
+    }
+    .ft-rule { width: 32px; height: 1px; background: rgba(255,255,255,.25); margin: 0 auto 28px; }
+    .ft-names {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-size: 26px;
+      color: rgba(255,255,255,.9); margin-bottom: 8px;
+      letter-spacing: 2px;
+    }
+    .ft-date { font-family: 'Cormorant Garamond', serif; font-size: 14px; letter-spacing: 4px; color: rgba(255,255,255,.4); margin-bottom: 48px; }
+    .ft-contact-title { font-size: 9px; letter-spacing: 3px; color: rgba(255,255,255,.35); margin-bottom: 16px; text-transform: uppercase; }
+    .ft-btns { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+    .btn-call {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 11px 18px;
+      border: 1px solid rgba(255,255,255,.2);
+      color: rgba(255,255,255,.8); font-size: 13px;
+      text-decoration: none; font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 300; transition: border-color .2s; letter-spacing: .5px;
+    }
+    .btn-call:hover { border-color: rgba(255,255,255,.5); }
+    .ft-hosts { font-size: 12px; color: rgba(255,255,255,.35); line-height: 2.4; font-weight: 300; }
+    .ft-copy  { margin-top: 40px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 12px; color: rgba(255,255,255,.2); letter-spacing: 1px; }
+  </style>
+</head>
+<body>
+
+<!-- 모달 -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <span class="modal-icon" id="modal-icon">🎉</span>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-body"  id="modal-body"></div>
+    <button class="btn-modal-close" onclick="closeModal()">확인</button>
+  </div>
+</div>
+
+<!-- ════ HERO ════ -->
+<section class="hero">
+  <div class="hero-names-en reveal">Jung-hoon &amp; Woon-jin</div>
+
+  <div class="photo-frame reveal">
+    <img src="wedding.jpg" alt="함정훈 박운진 웨딩 사진"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+    <div class="photo-placeholder" style="display:none">
+      <span style="font-size:36px; opacity:.3">○</span>
+      <span>사진을 넣어주세요</span>
+    </div>
+  </div>
+
+  <div class="hero-names reveal" id="hero-names">함정훈 <em>·</em> 박운진</div>
+  <div class="hero-date reveal">August 9, 2026</div>
+
+  <div class="countdown reveal" id="countdown">
+    <div class="cd-item"><div class="cd-num" id="cd-d">--</div><div class="cd-lbl">DAYS</div></div>
+    <div class="cd-sep">·</div>
+    <div class="cd-item"><div class="cd-num" id="cd-h">--</div><div class="cd-lbl">HRS</div></div>
+    <div class="cd-sep">·</div>
+    <div class="cd-item"><div class="cd-num" id="cd-m">--</div><div class="cd-lbl">MIN</div></div>
+    <div class="cd-sep">·</div>
+    <div class="cd-item"><div class="cd-num" id="cd-s">--</div><div class="cd-lbl">SEC</div></div>
+  </div>
+
+  <!-- 라인드로잉 일러스트 (댄싱 피플) -->
+  <svg class="hero-illus reveal" viewBox="0 0 340 88" fill="none"
+       stroke="var(--ink)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"
+       xmlns="http://www.w3.org/2000/svg">
+    <!-- 왼쪽 여자 - 팔 위로 -->
+    <circle cx="44" cy="15" r="8"/>
+    <path d="M38,23 Q32,44 34,62 Q38,68 44,68 Q50,68 54,62 Q56,44 50,23"/>
+    <path d="M40,32 Q30,24 24,16"/>
+    <path d="M48,30 Q58,24 64,16"/>
+    <path d="M38,68 Q35,76 33,82"/>
+    <path d="M50,68 Q52,76 54,82"/>
+
+    <!-- 신랑 -->
+    <circle cx="132" cy="13" r="9"/>
+    <line x1="132" y1="22" x2="132" y2="56"/>
+    <path d="M126,38 Q110,44 104,52"/>
+    <path d="M138,35 Q154,42 160,46"/>
+    <line x1="132" y1="56" x2="122" y2="80"/>
+    <line x1="132" y1="56" x2="142" y2="80"/>
+    <path d="M129,23 L131,37 L132,34 L133,37 L135,23"/>
+
+    <!-- 신부 (드레스) -->
+    <circle cx="174" cy="13" r="9"/>
+    <path d="M165,22 Q154,46 152,68 Q158,74 174,74 Q190,74 196,68 Q194,46 183,22"/>
+    <path d="M167,36 Q160,42 156,46"/>
+    <path d="M178,33 Q192,28 200,22"/>
+    <path d="M166,10 Q170,4 178,10"/>
+
+    <!-- 오른쪽 여자 -->
+    <circle cx="262" cy="15" r="8"/>
+    <path d="M256,23 Q250,44 252,62 Q256,68 262,68 Q268,68 272,62 Q274,44 268,23"/>
+    <path d="M258,30 Q248,24 242,18"/>
+    <path d="M266,30 Q276,26 282,18"/>
+    <path d="M256,68 Q253,76 252,82"/>
+    <path d="M268,68 Q269,76 272,82"/>
+
+    <!-- 오른쪽 남자 -->
+    <circle cx="314" cy="15" r="8"/>
+    <line x1="314" y1="23" x2="314" y2="56"/>
+    <path d="M308,38 Q298,32 292,26"/>
+    <path d="M320,38 Q330,44 336,52"/>
+    <line x1="314" y1="56" x2="306" y2="80"/>
+    <line x1="314" y1="56" x2="322" y2="80"/>
+    <path d="M311,23 L313,37 L314,34 L315,37 L317,23"/>
+  </svg>
+
+  <div class="scroll-hint">scroll</div>
+</section>
+
+<hr class="thin-line">
+
+<!-- ════ 청첩 본문 ════ -->
+<section class="sec sec-white">
+  <div class="invite-ko reveal">We're getting married</div>
+  <div class="invite-headline reveal">결 혼 합 니 다</div>
+
+  <p class="invite-text reveal">
+    뻔한 길보다는 가보지 않은 길에<br>
+    늘 마음이 뛰던 저희입니다.<br><br>
+    그런 저희가 만나 이제 같은 곳을 보며<br>
+    인생이라는 예측 불허한 게임을<br>
+    함께 플레이하려 합니다.<br><br>
+    조금은 정석에서 벗어나 있더라도<br>
+    충분히 행복할 수 있다는 것을<br>
+    저희의 앞날을 통해 보여드리고 싶습니다.<br><br>
+    호기심 가득한 저희의 앞날을<br>
+    함께 축복해 주세요!
+  </p>
+
+  <div class="invite-parents reveal">
+    <div>함상구 · 김미선의 <strong>아들</strong> &nbsp;함정훈</div>
+    <div style="margin-top:6px">고현숙의 <strong>딸</strong> &nbsp;박운진</div>
+  </div>
+
+  <div class="party-card reveal">
+    <p class="party-text">
+      정답이 없는 인생이라,<br>
+      저희의 결혼식도 <strong>정석 대신 재미</strong>를 택했습니다.<br><br>
+      보는 결혼식이 아닌 <strong>즐기는 파티</strong>로,<br>
+      저희 두 사람의 첫 시작을 함께해 주세요.
+    </p>
+  </div>
+</section>
+
+<hr class="thin-line">
+<div class="section-rule" style="padding:20px 32px"><span>ceremony</span></div>
+<hr class="thin-line">
+
+<!-- ════ 예식 안내 ════ -->
+<section class="sec sec-cream">
+  <div class="sec-title reveal">
+    예 식 안 내
+    <span class="sec-title-en">Details</span>
+  </div>
+
+  <div class="detail-list reveal">
+    <div class="detail-row">
+      <div class="d-label">Date</div>
+      <div>
+        <div class="d-val">2026년 8월 9일 일요일</div>
+        <div class="d-sub">오후 2시 30분</div>
+      </div>
+    </div>
+    <div class="detail-row">
+      <div class="d-label">Venue</div>
+      <div>
+        <div class="d-val">드레스 가든</div>
+        <div class="d-sub">4F BLISS DOME</div>
+      </div>
+    </div>
+    <div class="detail-row">
+      <div class="d-label">Address</div>
+      <div>
+        <div class="d-val" style="font-size:14px">서울 강남구 영동대로 707</div>
+      </div>
+    </div>
+    <div class="detail-row">
+      <div class="d-label">Dress</div>
+      <div>
+        <div class="d-val">블루 &amp; 스카이블루</div>
+        <div class="d-sub">파란 계열로 함께해 주시면 더욱 예뻐요 💙</div>
+      </div>
+    </div>
+    <div class="detail-row">
+      <div class="d-label">Lucky</div>
+      <div>
+        <div class="d-val">럭키드로우</div>
+        <div class="d-sub">하객분들께 특별한 선물이 준비되어 있어요</div>
+        <span class="lucky-tag">당일 현장 추첨</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="thin-line">
+<div class="section-rule" style="padding:20px 32px"><span>directions</span></div>
+<hr class="thin-line">
+
+<!-- ════ 찾아오는 길 ════ -->
+<section class="sec sec-white">
+  <div class="sec-title reveal">
+    찾 아 오 는 길
+    <span class="sec-title-en">Location</span>
+  </div>
+
+  <!-- 지도 SVG 일러스트 -->
+  <div class="map-box reveal">
+    <svg viewBox="0 0 480 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#EDE9DC;">
+
+      <!-- 블록 배경 -->
+      <rect x="0"   y="0"   width="480" height="280" fill="#EDE9DC"/>
+
+      <!-- 공원/녹지 블록 -->
+      <rect x="20"  y="30"  width="90"  height="60"  fill="#D4E2C8" rx="2"/>
+      <rect x="340" y="160" width="80"  height="70"  fill="#D4E2C8" rx="2"/>
+      <rect x="20"  y="200" width="60"  height="60"  fill="#D4E2C8" rx="2"/>
+
+      <!-- 건물 블록들 -->
+      <rect x="20"  y="110" width="55"  height="40"  fill="#D9D3C2" rx="1"/>
+      <rect x="85"  y="110" width="45"  height="40"  fill="#D9D3C2" rx="1"/>
+      <rect x="20"  y="165" width="42"  height="28"  fill="#D9D3C2" rx="1"/>
+      <rect x="72"  y="165" width="58"  height="28"  fill="#D9D3C2" rx="1"/>
+      <rect x="145" y="30"  width="62"  height="42"  fill="#D9D3C2" rx="1"/>
+      <rect x="145" y="82"  width="62"  height="38"  fill="#D9D3C2" rx="1"/>
+      <rect x="145" y="165" width="45"  height="35"  fill="#D9D3C2" rx="1"/>
+      <rect x="145" y="210" width="45"  height="45"  fill="#D9D3C2" rx="1"/>
+      <rect x="340" y="30"  width="70"  height="50"  fill="#D9D3C2" rx="1"/>
+      <rect x="340" y="90"  width="70"  height="58"  fill="#D9D3C2" rx="1"/>
+      <rect x="390" y="165" width="70"  height="50"  fill="#D9D3C2" rx="1"/>
+      <rect x="390" y="225" width="70"  height="45"  fill="#D9D3C2" rx="1"/>
+
+      <!-- 도로: 세로 작은 도로들 -->
+      <rect x="136" y="0"   width="9"   height="280" fill="#F4EFE2"/>
+      <rect x="330" y="0"   width="9"   height="280" fill="#F4EFE2"/>
+      <rect x="0"   y="100" width="480" height="9"   fill="#F4EFE2"/>
+      <rect x="0"   y="158" width="480" height="9"   fill="#F4EFE2"/>
+
+      <!-- 영동대로 — 굵은 메인 도로 (세로) -->
+      <rect x="215" y="0"   width="24"  height="280" fill="#FDFAF3"/>
+      <!-- 영동대로 센터라인 (점선) -->
+      <line x1="227" y1="0" x2="227" y2="280" stroke="#D6CCBC" stroke-width="1" stroke-dasharray="8,6"/>
+
+      <!-- 학동로 — 굵은 메인 도로 (가로) -->
+      <rect x="0"   y="126" width="480" height="22"  fill="#FDFAF3"/>
+      <!-- 학동로 센터라인 (점선) -->
+      <line x1="0" y1="137" x2="480" y2="137" stroke="#D6CCBC" stroke-width="1" stroke-dasharray="8,6"/>
+
+      <!-- 도로명 라벨 -->
+      <text x="232" y="52"  font-size="8.5" fill="#9A9288" font-family="Arial,sans-serif" text-anchor="middle" transform="rotate(90,232,52)">영동대로</text>
+      <text x="232" y="232" font-size="8.5" fill="#9A9288" font-family="Arial,sans-serif" text-anchor="middle" transform="rotate(90,232,232)">영동대로</text>
+      <text x="80"  y="133" font-size="8.5" fill="#9A9288" font-family="Arial,sans-serif" text-anchor="middle">학동로</text>
+      <text x="400" y="133" font-size="8.5" fill="#9A9288" font-family="Arial,sans-serif" text-anchor="middle">학동로</text>
+
+      <!-- 청담역 (7호선) 아이콘 -->
+      <circle cx="227" cy="137" r="11" fill="#45742C" stroke="#FDFAF3" stroke-width="2"/>
+      <text x="227" y="141" font-size="9" fill="white" font-family="Arial,sans-serif" font-weight="bold" text-anchor="middle">7</text>
+      <!-- 청담역 라벨 -->
+      <rect x="192" y="152" width="46" height="15" fill="white" rx="2" opacity="0.9"/>
+      <text x="215" y="163" font-size="9" fill="#18140E" font-family="'Noto Sans KR',Arial,sans-serif" font-weight="bold" text-anchor="middle">청담역</text>
+      <!-- 13번 출구 표시 -->
+      <circle cx="258" cy="137" r="7" fill="#FDFAF3" stroke="#45742C" stroke-width="1.5"/>
+      <text x="258" y="141" font-size="7" fill="#45742C" font-family="Arial,sans-serif" font-weight="bold" text-anchor="middle">13</text>
+
+      <!-- 드레스가든 핀 -->
+      <!-- 핀 그림자 -->
+      <ellipse cx="280" cy="108" rx="6" ry="3" fill="rgba(0,0,0,0.12)"/>
+      <!-- 핀 몸통 -->
+      <path d="M280,60 C268,60 260,69 260,79 C260,94 280,108 280,108 C280,108 300,94 300,79 C300,69 292,60 280,60 Z"
+            fill="#18140E" stroke="none"/>
+      <!-- 핀 내부 원 -->
+      <circle cx="280" cy="79" r="7" fill="#FDFAF3"/>
+      <!-- 핀 라벨 -->
+      <rect x="234" y="42" width="92" height="18" fill="white" rx="9" opacity="0.95"
+            filter="url(#shadow)"/>
+      <text x="280" y="55" font-size="9.5" fill="#18140E" font-family="'Noto Sans KR',Arial,sans-serif" font-weight="bold" text-anchor="middle">드레스 가든</text>
+
+      <!-- 핀 → 역 연결 점선 -->
+      <line x1="280" y1="109" x2="248" y2="128" stroke="#18140E" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+
+      <!-- 도보 거리 라벨 -->
+      <rect x="246" y="113" width="38" height="13" fill="#18140E" rx="6"/>
+      <text x="265" y="123" font-size="7.5" fill="white" font-family="Arial,sans-serif" text-anchor="middle">도보 1분</text>
+
+      <defs>
+        <filter id="shadow" x="-10%" y="-20%" width="120%" height="160%">
+          <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="rgba(0,0,0,0.15)"/>
+        </filter>
+      </defs>
+    </svg>
+  </div>
+
+  <a href="https://naver.me/55rmbsR7" target="_blank" class="btn-map btn-naver reveal">
+    <span>🗺</span> 네이버 지도로 보기
+  </a>
+  <a href="https://map.kakao.com/?q=%EB%93%9C%EB%A0%88%EC%8A%A4%EA%B0%80%EB%93%A0%20%EA%B0%95%EB%82%A8%EA%B5%AC%20%EC%98%81%EB%8F%99%EB%8C%80%EB%A1%9C%20707"
+     target="_blank" class="btn-map btn-kakao reveal">
+    <span>🟡</span> 카카오맵으로 보기
+  </a>
+
+  <div class="transport reveal">
+    <div class="t-row">
+      <span class="t-label">Metro</span>
+      <span>7호선 청담역 13번 출구 → 도보 1분 (49m)</span>
+    </div>
+    <div class="t-row">
+      <span class="t-label">Bus</span>
+      <span>146, 341, 360번 · 청담역 정류장 하차</span>
+    </div>
+    <div class="t-row">
+      <span class="t-label">Park</span>
+      <span>건물 내 주차 · 예식 하객 무료</span>
+    </div>
+  </div>
+</section>
+
+<hr class="thin-line">
+<div class="section-rule" style="padding:20px 32px"><span>나는 solo</span></div>
+<hr class="thin-line">
+
+<!-- ════ 나는 솔로 ════ -->
+<section class="solo-sec">
+  <div class="stars-bg" id="stars-bg"></div>
+
+  <div class="solo-intro">
+    <div style="position:relative;z-index:1">
+      <div class="solo-logo reveal">
+        <span class="solo-naneun">나는</span>
+        <span class="solo-word">SOLO</span>
+      </div>
+      <div class="solo-official reveal">함정훈 · 박운진 Official</div>
+      <p class="solo-sub reveal">
+        솔로인 당신을 위한 특별 코너<br>
+        <strong>신랑·신부 지인이라면 남녀 누구나</strong><br>
+        좋은 인연을 찾고 싶다면 자기소개를 남겨주세요.<br>
+        두 사람이 직접 소개팅을 주선해 드릴게요 💘
+      </p>
+    </div>
+  </div>
+
+  <div class="solo-cards-label reveal">— 참가자 프로필 —</div>
+  <div class="solo-cards-wrap reveal" id="solo-cards"></div>
+
+  <div class="solo-form-wrap">
+    <div class="solo-form reveal">
+      <div class="solo-form-title">자기소개 신청</div>
+      <div class="solo-form-sub">신청 내용은 신랑·신부에게만 전달됩니다</div>
+
+      <div class="fg-row">
+        <div class="fg">
+          <label class="fg-label">이름 *</label>
+          <input class="fg-input" id="s-name" placeholder="홍길동" maxlength="10">
+        </div>
+        <div class="fg">
+          <label class="fg-label">나이 *</label>
+          <input class="fg-input" id="s-age" type="number" placeholder="28" min="20" max="50">
+        </div>
+      </div>
+
+      <div class="fg-row">
+        <div class="fg">
+          <label class="fg-label">직업 *</label>
+          <input class="fg-input" id="s-job" placeholder="회사원" maxlength="20">
+        </div>
+        <div class="fg">
+          <label class="fg-label">MBTI</label>
+          <input class="fg-input" id="s-mbti" placeholder="ENFP" maxlength="4">
+        </div>
+      </div>
+
+      <div class="fg">
+        <label class="fg-label">성별 *</label>
+        <div class="radio-group">
+          <label class="radio-label"><input type="radio" name="s-gender" value="남성"> 남성</label>
+          <label class="radio-label"><input type="radio" name="s-gender" value="여성"> 여성</label>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label class="fg-label">신랑측 / 신부측 *</label>
+        <div class="radio-group">
+          <label class="radio-label"><input type="radio" name="s-side" value="신랑측"> 신랑측</label>
+          <label class="radio-label"><input type="radio" name="s-side" value="신부측"> 신부측</label>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label class="fg-label">한줄 자기소개 *</label>
+        <textarea class="fg-textarea" id="s-intro"
+          placeholder="저는 ___한 사람이에요. 이런 분을 찾고 있어요 ✨" maxlength="150"></textarea>
+      </div>
+
+      <div class="fg">
+        <label class="fg-label">연락처 (선택 · 신랑신부에게만)</label>
+        <input class="fg-input" id="s-contact" type="tel" placeholder="010-0000-0000">
+      </div>
+
+      <button class="btn-solo" onclick="submitSolo()">❤ 나도 솔로 신청</button>
+    </div>
+  </div>
+</section>
+
+<!-- ════ FOOTER ════ -->
+<footer class="footer">
+  <div class="ft-rule"></div>
+  <div class="ft-names">함정훈 &amp; 박운진</div>
+  <div class="ft-date">2026 · 08 · 09</div>
+  <div class="ft-contact-title">Contact</div>
+  <div class="ft-btns">
+    <a href="tel:010-9432-0293" class="btn-call">신랑 함정훈</a>
+    <a href="tel:010-4189-1909" class="btn-call">신부 박운진</a>
+  </div>
+  <div class="ft-hosts">함상구 · 김미선 &nbsp;|&nbsp; 고현숙</div>
+  <div class="ft-copy">Made with love for our special day</div>
+</footer>
+
+<script>
+/* ── 스크롤 리빌 ─────────────────────────────────── */
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.06 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+setTimeout(() => {
+  document.querySelectorAll('.hero .reveal').forEach(el => el.classList.add('visible'));
+}, 80);
+
+/* ── 카운트다운 ──────────────────────────────────── */
+const WEDDING = new Date('2026-08-09T14:30:00');
+function tick() {
+  const diff = WEDDING - Date.now();
+  if (diff <= 0) {
+    document.getElementById('countdown').innerHTML =
+      '<div style="font-family:Cormorant Garamond,serif;font-style:italic;font-size:20px;color:var(--ink-m)">오늘이 그 날입니다</div>';
+    return;
+  }
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000)  / 60000);
+  const s = Math.floor((diff % 60000)    / 1000);
+  document.getElementById('cd-d').textContent = String(d).padStart(2,'0');
+  document.getElementById('cd-h').textContent = String(h).padStart(2,'0');
+  document.getElementById('cd-m').textContent = String(m).padStart(2,'0');
+  document.getElementById('cd-s').textContent = String(s).padStart(2,'0');
+}
+tick(); setInterval(tick, 1000);
+
+/* ── 나는 솔로 ───────────────────────────────────── */
+const DEMO = [
+  { name:'영식', age:31, job:'건축가',  mbti:'ISTP', gender:'남성', side:'신랑측',
+    intro:'디테일에 강하고 손재주 있어요. 카페투어 좋아해요', avatar:'👨‍🎨',
+    tagline:'처음엔 과묵해 보여도' },
+  { name:'지수', age:28, job:'마케터',  mbti:'ENFP', gender:'여성', side:'신부측',
+    intro:'밝고 에너지 넘쳐요! 여행이랑 맛집 탐방이 취미예요', avatar:'👩‍💼',
+    tagline:'한 번 웃기면 끝나는' },
+  { name:'준혁', age:33, job:'의사',    mbti:'INTJ', gender:'남성', side:'신랑측',
+    intro:'진지하고 책임감 있어요. 운동 좋아하고 요리도 해요', avatar:'👨‍⚕️',
+    tagline:'한눈에 들어오는' },
+];
+
+function getSoloList() {
+  return [...DEMO, ...JSON.parse(localStorage.getItem('solo-list') || '[]')];
+}
+function renderSoloCards() {
+  const box = document.getElementById('solo-cards');
+  box.innerHTML = '';
+  getSoloList().forEach(p => {
+    const c = document.createElement('div');
+    c.className = 's-card';
+    c.style.position = 'relative';
+    c.innerHTML = `
+      <div class="s-card-top">
+        <span class="s-show-logo">나는 <b>SOLO</b></span>
+        <span class="s-brand">${p.side||''}<br>Official</span>
+      </div>
+      <div class="s-card-body">
+        <div class="s-avatar">${p.avatar||(p.gender==='여성'?'👩':'👨')}</div>
+        <div class="s-tagline">${p.tagline||''} <span class="hl">${p.name}</span></div>
+        <div class="s-name">${p.name}</div>
+        <div class="s-info">${p.age}세 · ${p.gender} · ${p.job}</div>
+        ${p.mbti?`<div class="s-mbti">${p.mbti}</div>`:''}
+        <div class="s-intro">${p.intro}</div>
+      </div>`;
+    box.appendChild(c);
+  });
+}
+renderSoloCards();
+
+function submitSolo() {
+  const name    = document.getElementById('s-name').value.trim();
+  const age     = parseInt(document.getElementById('s-age').value);
+  const job     = document.getElementById('s-job').value.trim();
+  const mbti    = document.getElementById('s-mbti').value.trim().toUpperCase();
+  const intro   = document.getElementById('s-intro').value.trim();
+  const contact = document.getElementById('s-contact').value.trim();
+  const gEl     = document.querySelector('input[name="s-gender"]:checked');
+  const sEl     = document.querySelector('input[name="s-side"]:checked');
+  if (!name||!age||!job||!intro||!gEl||!sEl) { alert('필수 항목을 모두 입력해주세요!'); return; }
+  if (age<20||age>55) { alert('나이를 다시 확인해주세요!'); return; }
+  const newP = { name, age, job, mbti, gender:gEl.value, side:sEl.value, intro, contact,
+    avatar: gEl.value==='여성'?'👩':'👨' };
+  const list = JSON.parse(localStorage.getItem('solo-list')||'[]');
+  list.push(newP); localStorage.setItem('solo-list', JSON.stringify(list));
+  renderSoloCards();
+  ['s-name','s-age','s-job','s-mbti','s-intro','s-contact'].forEach(id => document.getElementById(id).value='');
+  document.querySelectorAll('input[name="s-gender"],input[name="s-side"]').forEach(r=>r.checked=false);
+  document.getElementById('solo-cards').scrollIntoView({behavior:'smooth',block:'nearest'});
+  showModal('❤','신청 완료!',`${name}님, 신청해 주셔서 감사해요!\n신랑·신부가 좋은 인연 꼭 연결해 드릴게요`);
+}
+document.getElementById('s-mbti').addEventListener('input', function(){ this.value=this.value.toUpperCase(); });
+
+/* ── 별 배경 ─────────────────────────────────────── */
+const starsEl = document.getElementById('stars-bg');
+for (let i=0;i<40;i++){
+  const s=document.createElement('div'); s.className='star-dot';
+  const sz=1+Math.random()*2.5;
+  s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation-delay:${Math.random()*4}s;animation-duration:${2+Math.random()*3}s;`;
+  starsEl.appendChild(s);
+}
+
+/* ── 모달 ────────────────────────────────────────── */
+function showModal(icon,title,body){
+  document.getElementById('modal-icon').textContent=icon;
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-body').textContent=body;
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){ document.getElementById('modal').classList.remove('show'); }
+document.getElementById('modal').addEventListener('click',function(e){ if(e.target===this)closeModal(); });
+</script>
+</body>
+</html>
