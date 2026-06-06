@@ -1,0 +1,11 @@
+{
+  "name": "wedding-invitation",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "check": "node --check api/wedding.js"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}

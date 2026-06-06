@@ -1230,6 +1230,16 @@
     }
     .btn-solo:hover { background: #2A241B; }
     .btn-solo:active { transform: translateY(1px); }
+    .btn-ticket:disabled,
+    .btn-solo:disabled {
+      opacity: .58;
+      cursor: wait;
+      transform: none;
+    }
+    .btn-ticket:disabled::after,
+    .btn-solo:disabled::after {
+      display: none;
+    }
 
     /* ── 푸터 ──────────────────────────────────────── */
     .footer {
@@ -1542,7 +1552,7 @@
       <span class="ticket-reel"><span class="ticket-reel-digit">0</span></span>
     </div>
     <div class="ticket-help" id="ticket-help">추첨권 번호는 2026년 8월 9일 예식 당일에만 받을 수 있습니다.</div>
-    <button class="btn-ticket" type="button" onclick="issueLuckyTicket()">
+    <button class="btn-ticket" id="ticket-button" type="button" onclick="issueLuckyTicket()">
       <svg class="ui-icon" aria-hidden="true"><use href="#icon-ticket"></use></svg>
       <span id="ticket-button-label">추첨권 번호 받기</span>
     </button>
@@ -1753,9 +1763,9 @@
         <input class="fg-input" id="s-contact" type="tel" placeholder="010-0000-0000" autocomplete="tel">
       </div>
 
-      <button class="btn-solo" type="button" onclick="submitSolo()">
+      <button class="btn-solo" id="solo-submit-button" type="button" onclick="submitSolo()">
         <svg class="ui-icon" aria-hidden="true"><use href="#icon-check"></use></svg>
-        신청 완료하기
+        <span id="solo-submit-label">신청 완료하기</span>
       </button>
     </div>
   </div>
@@ -1783,6 +1793,24 @@
 
 <script>
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const WEDDING_API_ENDPOINT = window.location.hostname.endsWith('.vercel.app')
+  ? '/api/wedding'
+  : 'https://wedding-invitation-five-eta.vercel.app/api/wedding';
+
+async function postWeddingApi(action, payload) {
+  const response = await fetch(WEDDING_API_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, ...payload })
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok || !data || !data.ok) {
+    const error = new Error(data && data.error ? data.error : `request_failed_${response.status}`);
+    error.response = data;
+    throw error;
+  }
+  return data;
+}
 
 /* ── 스크롤 리빌 ─────────────────────────────────── */
 const revealObs = new IntersectionObserver(entries => {
@@ -1863,11 +1891,12 @@ tick(); setInterval(tick, 1000);
 /* ── 럭키드로우 ─────────────────────────────────── */
 const LUCKY_TICKET_KEY = 'wedding-lucky-ticket';
 const LUCKY_DEVICE_KEY = 'wedding-lucky-device';
-const LUCKY_TICKET_ENDPOINT = '';
+const LUCKY_TICKET_ENDPOINT = WEDDING_API_ENDPOINT;
 const LUCKY_TICKET_OPEN = new Date('2026-08-09T00:00:00+09:00');
 const LUCKY_TICKET_CLOSE = new Date('2026-08-10T00:00:00+09:00');
 let luckySpinTimer = null;
 let luckySpinStep = 0;
+let luckyTicketIssuing = false;
 
 function createLuckyTicketNumber() {
   const array = new Uint32Array(1);
@@ -1941,20 +1970,14 @@ function getLuckyDeviceId() {
 }
 
 async function requestLuckyTicketFromEndpoint() {
-  if (!LUCKY_TICKET_ENDPOINT) return null;
+  if (!LUCKY_TICKET_ENDPOINT) throw new Error('missing_ticket_endpoint');
 
-  const response = await fetch(LUCKY_TICKET_ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      deviceId: getLuckyDeviceId(),
-      userAgent: navigator.userAgent,
-      requestedAt: new Date().toISOString()
-    })
+  const data = await postWeddingApi('issue_lucky_ticket', {
+    deviceId: getLuckyDeviceId(),
+    source: 'wedding-invitation',
+    userAgent: navigator.userAgent,
+    requestedAt: new Date().toISOString()
   });
-  if (!response.ok) throw new Error(`Lucky ticket issue failed: ${response.status}`);
-
-  const data = await response.json();
   if (!data || !/^WJ-\d{4}$/.test(data.number || '')) {
     throw new Error('Lucky ticket endpoint returned an invalid number');
   }
@@ -2007,6 +2030,19 @@ function renderLuckyTicket(ticket) {
   if (buttonLabel) buttonLabel.textContent = '내 추첨권 다시 보기';
 }
 
+function setLuckyTicketPending(isPending) {
+  luckyTicketIssuing = isPending;
+  const button = document.getElementById('ticket-button');
+  const buttonLabel = document.getElementById('ticket-button-label');
+  if (button) {
+    button.disabled = isPending;
+    button.setAttribute('aria-busy', isPending ? 'true' : 'false');
+  }
+  if (buttonLabel) {
+    buttonLabel.textContent = isPending ? '번호 발급 중' : (getLuckyTicket() ? '내 추첨권 다시 보기' : '8월 9일에 번호 받기');
+  }
+}
+
 function getLuckyTicket() {
   try {
     if (new Date() < LUCKY_TICKET_OPEN) {
@@ -2032,6 +2068,8 @@ function getLuckyTicket() {
 }
 
 async function issueLuckyTicket() {
+  if (luckyTicketIssuing) return;
+
   const savedTicket = getLuckyTicket();
   if (savedTicket) {
     renderLuckyTicket(savedTicket);
@@ -2046,20 +2084,20 @@ async function issueLuckyTicket() {
 
   let ticket;
   try {
+    setLuckyTicketPending(true);
     ticket = await requestLuckyTicketFromEndpoint();
   } catch (error) {
     console.error(error);
-    showModal('icon-ticket','발급을 다시 시도해주세요','추첨권 번호 발급 서버에 연결하지 못했습니다.\n잠시 후 다시 눌러주세요.');
+    if (error.message === 'ticket_not_open') {
+      showModal('icon-ticket','8월 9일 당일에 추첨권을 받을 수 있어요','예식장에서 다시 눌러주세요.');
+    } else {
+      showModal('icon-ticket','발급을 다시 시도해주세요','추첨권 번호 발급 서버에 연결하지 못했습니다.\n잠시 후 다시 눌러주세요.');
+    }
     return;
+  } finally {
+    setLuckyTicketPending(false);
   }
 
-  if (!ticket) {
-    ticket = {
-      number: createLuckyTicketNumber(),
-      issuedAt: new Date().toISOString(),
-      source: 'local'
-    };
-  }
   localStorage.setItem(LUCKY_TICKET_KEY, JSON.stringify(ticket));
   renderLuckyTicket(ticket);
   showModal('icon-gift','추첨권 발급 완료',`${ticket.number}\n예식 당일 현장에서 이 화면을 보여주세요.`);
@@ -2271,7 +2309,8 @@ function renderSoloCards() {
 }
 renderSoloCards();
 
-const SOLO_SUBMISSION_ENDPOINT = '';
+const SOLO_SUBMISSION_ENDPOINT = WEDDING_API_ENDPOINT;
+let soloSubmitting = false;
 
 function syncRadioLabels() {
   document.querySelectorAll('.radio-label').forEach(label => {
@@ -2287,18 +2326,35 @@ document.querySelectorAll('.radio-label input[type="radio"]').forEach(input => {
 syncRadioLabels();
 
 async function sendSoloApplication(application) {
-  if (!SOLO_SUBMISSION_ENDPOINT) return { method: 'local' };
+  if (!SOLO_SUBMISSION_ENDPOINT) throw new Error('missing_solo_endpoint');
 
-  const response = await fetch(SOLO_SUBMISSION_ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(application)
+  const data = await postWeddingApi('submit_solo_application', {
+    ...application,
+    userAgent: navigator.userAgent
   });
-  if (!response.ok) throw new Error(`SOLO submission failed: ${response.status}`);
-  return { method: 'endpoint' };
+  return {
+    method: 'endpoint',
+    duplicate: Boolean(data.duplicate),
+    applicationId: data.applicationId
+  };
+}
+
+function setSoloSubmitPending(isPending) {
+  soloSubmitting = isPending;
+  const button = document.getElementById('solo-submit-button');
+  const label = document.getElementById('solo-submit-label');
+  if (button) {
+    button.disabled = isPending;
+    button.setAttribute('aria-busy', isPending ? 'true' : 'false');
+  }
+  if (label) {
+    label.textContent = isPending ? '신청 접수 중' : '신청 완료하기';
+  }
 }
 
 async function submitSolo() {
+  if (soloSubmitting) return;
+
   const name    = document.getElementById('s-name').value.trim();
   const age     = Number(document.getElementById('s-age').value);
   const job     = document.getElementById('s-job').value.trim();
@@ -2319,11 +2375,14 @@ async function submitSolo() {
   };
 
   try {
+    setSoloSubmitPending(true);
     await sendSoloApplication(newP);
   } catch (error) {
     console.error(error);
     showModal('icon-message','신청을 완료하지 못했어요','잠시 후 다시 시도해주세요.');
     return;
+  } finally {
+    setSoloSubmitPending(false);
   }
 
   saveSoloApplication(newP);
