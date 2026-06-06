@@ -2168,12 +2168,14 @@ function getSoloCarouselIndex() {
 }
 
 function moveSoloCarousel(nextIndex, behavior = 'smooth') {
+  const box = document.getElementById('solo-cards');
   const cards = getSoloCarouselCards();
-  if (!cards.length) return;
+  if (!box || !cards.length) return;
 
   soloCarouselIndex = ((nextIndex % cards.length) + cards.length) % cards.length;
   const target = cards[soloCarouselIndex];
-  target.scrollIntoView({ behavior, block: 'nearest', inline: 'center' });
+  const left = target.offsetLeft - (box.clientWidth - target.offsetWidth) / 2;
+  box.scrollTo({ left: Math.max(0, left), behavior });
 }
 
 function stopSoloCarousel() {
