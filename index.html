@@ -928,6 +928,7 @@
       margin-top: 18px;
       position: relative;
       z-index: 1;
+      overflow: hidden;
     }
     .solo-cards-label {
       font-family: 'Cormorant Garamond', serif;
@@ -940,19 +941,29 @@
       position: relative; z-index: 1;
     }
     .solo-cards-wrap {
-      display: grid;
-      grid-template-columns: 1fr;
+      display: flex;
       gap: 12px;
-      overflow: visible;
-      padding: 0 0 2px;
-      position: relative; z-index: 1;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 0 20px 8px;
+      margin: 0 -20px;
+      position: relative;
+      z-index: 1;
+      overscroll-behavior-x: contain;
     }
     .solo-cards-wrap::-webkit-scrollbar { display: none; }
-    .solo-cards-wrap::after { display: none; }
 
     .s-card {
-      width: 100%;
-      min-height: 0;
+      position: relative;
+      flex: 0 0 min(82vw, 344px);
+      width: min(82vw, 344px);
+      min-height: 190px;
+      scroll-snap-align: center;
+      scroll-snap-stop: always;
       border-radius: 22px;
       overflow: hidden;
       background:
@@ -964,6 +975,8 @@
       border: 1px solid rgba(248,241,229,.36);
       box-shadow: 0 14px 30px rgba(0,0,0,.22);
     }
+    .s-card:first-child { margin-left: 0; }
+    .s-card:last-child { margin-right: 0; }
     .s-card::before {
       content: '';
       position: absolute;
@@ -1014,7 +1027,7 @@
       grid-template-columns: 54px 1fr;
       column-gap: 12px;
       align-items: start;
-      padding: 10px 16px 16px;
+      padding: 10px 16px 18px;
       position: relative;
       z-index: 1;
     }
@@ -2056,6 +2069,7 @@ renderLuckyTicket(getLuckyTicket());
 
 /* ── 나는 솔로 ───────────────────────────────────── */
 const SOLO_APPLICATIONS_KEY = 'wedding-solo-applications';
+const SOLO_VISIBLE_PROFILE_LIMIT = 5;
 const DUMMY_PROFILES = [
   { alias:'영식', age:31, job:'건축가',  mbti:'ISTP', gender:'남성', side:'신랑측',
     intro:'디테일에 강하고 손재주 있어요. 카페투어 좋아해요',
@@ -2107,13 +2121,15 @@ function saveSoloApplication(application) {
     ...application,
     alias: application.alias || createSoloAlias(applications.length)
   };
-  applications.push(applicationWithAlias);
+  applications.unshift(applicationWithAlias);
   localStorage.setItem(SOLO_APPLICATIONS_KEY, JSON.stringify(applications));
   return applicationWithAlias;
 }
 
 function getSoloList() {
-  return [...getStoredSoloApplications(), ...DUMMY_PROFILES].map((profile, index) => ({
+  const applications = getStoredSoloApplications().slice(0, SOLO_VISIBLE_PROFILE_LIMIT);
+  const dummyCount = Math.max(0, SOLO_VISIBLE_PROFILE_LIMIT - applications.length);
+  return [...applications, ...DUMMY_PROFILES.slice(0, dummyCount)].map((profile, index) => ({
     ...profile,
     alias: profile.alias || createSoloAlias(index),
     avatar: `No. ${String(index + 1).padStart(2, '0')}`
@@ -2128,6 +2144,93 @@ function escapeHtml(value) {
     "'": '&#39;'
   }[char]));
 }
+
+let soloCarouselTimer = null;
+let soloCarouselResumeTimer = null;
+let soloCarouselIndex = 0;
+
+function getSoloCarouselCards() {
+  return Array.from(document.querySelectorAll('#solo-cards .s-card'));
+}
+
+function getSoloCarouselIndex() {
+  const box = document.getElementById('solo-cards');
+  const cards = getSoloCarouselCards();
+  if (!box || !cards.length) return 0;
+
+  const boxCenter = box.scrollLeft + box.clientWidth / 2;
+  return cards.reduce((closestIndex, card, index) => {
+    const closestCard = cards[closestIndex];
+    const currentDistance = Math.abs(card.offsetLeft + card.offsetWidth / 2 - boxCenter);
+    const closestDistance = Math.abs(closestCard.offsetLeft + closestCard.offsetWidth / 2 - boxCenter);
+    return currentDistance < closestDistance ? index : closestIndex;
+  }, 0);
+}
+
+function moveSoloCarousel(nextIndex, behavior = 'smooth') {
+  const cards = getSoloCarouselCards();
+  if (!cards.length) return;
+
+  soloCarouselIndex = ((nextIndex % cards.length) + cards.length) % cards.length;
+  const target = cards[soloCarouselIndex];
+  target.scrollIntoView({ behavior, block: 'nearest', inline: 'center' });
+}
+
+function stopSoloCarousel() {
+  if (soloCarouselTimer) {
+    clearInterval(soloCarouselTimer);
+    soloCarouselTimer = null;
+  }
+}
+
+function scheduleSoloCarouselResume() {
+  if (prefersReducedMotion) return;
+  clearTimeout(soloCarouselResumeTimer);
+  soloCarouselResumeTimer = setTimeout(startSoloCarousel, 3200);
+}
+
+function pauseSoloCarousel() {
+  soloCarouselIndex = getSoloCarouselIndex();
+  stopSoloCarousel();
+  scheduleSoloCarouselResume();
+}
+
+function bindSoloCarousel() {
+  const box = document.getElementById('solo-cards');
+  if (!box || box.dataset.carouselBound === 'true') return;
+
+  box.dataset.carouselBound = 'true';
+  ['pointerdown', 'touchstart', 'focusin', 'mouseenter'].forEach(eventName => {
+    box.addEventListener(eventName, pauseSoloCarousel, { passive: true });
+  });
+  ['pointerup', 'touchend', 'focusout', 'mouseleave'].forEach(eventName => {
+    box.addEventListener(eventName, scheduleSoloCarouselResume, { passive: true });
+  });
+}
+
+function startSoloCarousel() {
+  const box = document.getElementById('solo-cards');
+  const cards = getSoloCarouselCards();
+  if (!box || prefersReducedMotion || cards.length < 2) return;
+
+  stopSoloCarousel();
+  soloCarouselTimer = setInterval(() => {
+    moveSoloCarousel(soloCarouselIndex + 1);
+  }, 2600);
+}
+
+function initSoloCarousel() {
+  const box = document.getElementById('solo-cards');
+  if (!box) return;
+
+  bindSoloCarousel();
+  stopSoloCarousel();
+  clearTimeout(soloCarouselResumeTimer);
+  soloCarouselIndex = 0;
+  moveSoloCarousel(0, 'auto');
+  startSoloCarousel();
+}
+
 function renderSoloCards() {
   const box = document.getElementById('solo-cards');
   const label = document.getElementById('solo-cards-label');
@@ -2162,6 +2265,7 @@ function renderSoloCards() {
       </div>`;
     box.appendChild(c);
   });
+  initSoloCarousel();
 }
 renderSoloCards();
 
