@@ -2,8 +2,16 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>함정훈 ♥ 박운진</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>함정훈 · 박운진</title>
+  <meta name="description" content="함정훈, 박운진의 2026년 8월 9일 모바일 청첩장입니다.">
+  <meta name="theme-color" content="#F4EFE2">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="함정훈 · 박운진">
+  <meta property="og:description" content="2026년 8월 9일, 드레스 가든에서 결혼합니다.">
+  <meta property="og:image" content="wedding.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
 
   <style>
@@ -16,23 +24,210 @@
       --ink-l:    #9A9288;
       --border:   #D6CCBC;
       --white:    #FDFAF3;
-      --solo-bg:  #0C0A18;
-      --solo-pk:  #FF3D6B;
+      --solo-bg:  #18140E;
+      --solo-cream: #F8F1E5;
+      --solo-line: rgba(248,241,229,.22);
+      --solo-red: #C84F5B;
+      --solo-gold: #D8B46A;
+      --radius-sm: 14px;
+      --radius-md: 18px;
+      --radius-lg: 24px;
+      --radius-xl: 30px;
+      --radius-pill: 999px;
+      --paper-light:
+        radial-gradient(circle at 18% 22%, rgba(24,20,14,.045) 0 .7px, transparent .9px),
+        radial-gradient(circle at 78% 36%, rgba(255,255,255,.7) 0 .8px, transparent 1px),
+        repeating-linear-gradient(102deg, rgba(24,20,14,.018) 0 1px, transparent 1px 9px);
+      --paper-dark:
+        radial-gradient(circle at 20% 30%, rgba(248,241,229,.055) 0 .7px, transparent .9px),
+        radial-gradient(circle at 76% 62%, rgba(0,0,0,.15) 0 .8px, transparent 1px),
+        repeating-linear-gradient(103deg, rgba(248,241,229,.025) 0 1px, transparent 1px 12px);
     }
 
     html { scroll-behavior: smooth; }
     body {
       font-family: 'Noto Sans KR', sans-serif;
-      background: var(--cream);
+      background-color: var(--cream);
+      background-image: var(--paper-light);
+      background-size: 180px 180px, 220px 220px, 14px 14px;
       color: var(--ink);
       max-width: 480px;
       margin: 0 auto;
       overflow-x: hidden;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 50%;
+      width: min(100%, 480px);
+      height: 100%;
+      transform: translateX(-50%);
+      z-index: 1999;
+      pointer-events: none;
+      opacity: .055;
+      background:
+        linear-gradient(90deg, rgba(24,20,14,.055), transparent 14%, transparent 86%, rgba(24,20,14,.045)),
+        radial-gradient(circle at 32% 20%, rgba(255,255,255,.32), transparent 22%),
+        radial-gradient(circle at 80% 74%, rgba(24,20,14,.05), transparent 26%);
+      mix-blend-mode: multiply;
+    }
+
+    /* ── 전역 인터랙션 ─────────────────────────────── */
+    .page-progress {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      width: min(100%, 480px);
+      height: 2px;
+      transform: translateX(-50%);
+      z-index: 3000;
+      pointer-events: none;
+      background: rgba(214,204,188,.32);
+    }
+    .page-progress__bar {
+      width: 100%;
+      height: 100%;
+      transform: scaleX(var(--scroll-progress, 0));
+      transform-origin: left center;
+      background: linear-gradient(90deg, var(--ink), var(--solo-gold), var(--solo-red));
+      transition: transform .12s ease-out;
+    }
+
+    .party-card,
+    .detail-row,
+    .map-box,
+    .prize-card,
+    .ticket-card,
+    .s-card,
+    .solo-form {
+      transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease;
+      will-change: transform;
+    }
+
+    .btn-map,
+    .btn-ticket,
+    .btn-solo,
+    .btn-call,
+    .btn-modal-close {
+      position: relative;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-map::after,
+    .btn-ticket::after,
+    .btn-solo::after,
+    .btn-call::after,
+    .btn-modal-close::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,.22) 45%, transparent 70%);
+      transform: translateX(-120%);
+      transition: transform .55s ease;
+      pointer-events: none;
+    }
+
+    .press-ripple {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.34);
+      transform: translate(-50%, -50%) scale(1);
+      animation: press-ripple .55s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes press-ripple {
+      to { opacity: 0; transform: translate(-50%, -50%) scale(18); }
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .party-card:hover,
+      .map-box:hover,
+      .prize-card:hover,
+      .ticket-card:hover,
+      .s-card:hover,
+      .solo-form:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 44px rgba(24,20,14,.16);
+      }
+      .detail-row:hover {
+        transform: translateX(3px);
+        border-bottom-color: rgba(24,20,14,.28);
+      }
+      .btn-map:hover::after,
+      .btn-ticket:hover::after,
+      .btn-solo:hover::after,
+      .btn-call:hover::after,
+      .btn-modal-close:hover::after {
+        transform: translateX(120%);
+      }
     }
 
     /* ── 스크롤 리빌 ─────────────────────────────── */
-    .reveal { opacity: 0; transform: translateY(22px); transition: opacity .9s ease, transform .9s ease; }
+    .reveal { opacity: 0; transform: translateY(22px); transition: opacity .9s ease, transform .9s ease; transition-delay: var(--reveal-delay, 0ms); }
     .reveal.visible { opacity: 1; transform: translateY(0); }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .reveal,
+      .party-card,
+      .detail-row,
+      .map-box,
+      .prize-card,
+      .ticket-card,
+      .s-card,
+      .solo-form {
+        opacity: 1;
+        transform: none !important;
+        transition: none;
+      }
+      .page-progress__bar { transition: none; }
+      .press-ripple { display: none; }
+      .scroll-hint { animation: none; }
+    }
+
+    a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
+      outline: 2px solid var(--ink);
+      outline-offset: 3px;
+    }
+
+    .icon-sprite { display: none; }
+    .ui-icon {
+      width: 22px;
+      height: 22px;
+      flex: 0 0 auto;
+      fill: currentColor;
+      stroke: currentColor;
+      stroke-width: 0;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      overflow: visible;
+    }
+    .modal-ui-icon {
+      width: 58px;
+      height: 58px;
+      color: var(--ink);
+    }
+    .dress-swatches {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 6px;
+      vertical-align: -2px;
+    }
+    .dress-swatches span {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      border: 1px solid rgba(24,20,14,.12);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.45);
+    }
+    .dress-swatches span:nth-child(1) { background: #DDEAF7; }
+    .dress-swatches span:nth-child(2) { background: #8DAFD3; }
+    .dress-swatches span:nth-child(3) { background: #355F8B; }
 
     /* ── 모달 ──────────────────────────────────────── */
     .modal-overlay {
@@ -40,29 +235,35 @@
       background: rgba(24,20,14,.5);
       display: flex; align-items: center; justify-content: center;
       z-index: 2000; padding: 24px;
-      opacity: 0; pointer-events: none; transition: opacity .3s;
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transition: opacity .3s, visibility 0s .3s;
     }
-    .modal-overlay.show { opacity: 1; pointer-events: all; }
+    .modal-overlay.show { opacity: 1; visibility: visible; pointer-events: all; transition: opacity .3s; }
     .modal {
-      background: var(--white); border-radius: 4px; padding: 36px 28px;
+      background: var(--white); border-radius: var(--radius-lg); padding: 36px 28px;
       text-align: center; max-width: 320px; width: 100%;
       transform: scale(.95); transition: transform .3s;
       border: 1px solid var(--border);
+      box-shadow: 0 24px 70px rgba(24,20,14,.28);
     }
     .modal-overlay.show .modal { transform: scale(1); }
-    .modal-icon  { font-size: 44px; margin-bottom: 12px; display: block; }
+    .modal-icon  { margin-bottom: 12px; display: inline-flex; align-items: center; justify-content: center; }
     .modal-title { font-family: 'Noto Serif KR', serif; font-size: 18px; color: var(--ink); margin-bottom: 10px; font-weight: 300; }
     .modal-body  { font-size: 13px; color: var(--ink-m); line-height: 1.9; margin-bottom: 22px; white-space: pre-line; word-break: keep-all; }
     .btn-modal-close {
       padding: 11px 32px; background: var(--ink); color: var(--cream);
-      border: none; border-radius: 2px; font-size: 13px;
+      border: none; border-radius: var(--radius-sm); font-size: 13px;
       font-family: 'Noto Sans KR', sans-serif; cursor: pointer; letter-spacing: 1px;
     }
 
     /* ── HERO ──────────────────────────────────────── */
     .hero {
       min-height: 100vh;
-      background: var(--cream);
+      background-color: var(--cream);
+      background-image:
+        linear-gradient(180deg, rgba(253,250,243,.28), transparent 42%),
+        var(--paper-light);
+      background-size: auto, 180px 180px, 220px 220px, 14px 14px;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       padding: 80px 32px 100px;
@@ -72,12 +273,23 @@
     /* 사진 */
     .photo-frame {
       width: 200px; height: 260px;
-      border-radius: 100px 100px 4px 4px;
+      border-radius: 110px 110px var(--radius-lg) var(--radius-lg);
       overflow: hidden;
       border: 1px solid var(--border);
       margin-bottom: 32px;
+      transform: translate3d(0, var(--hero-photo-shift, 0px), 0);
+      box-shadow: 0 0 0 rgba(24,20,14,0);
     }
-    .photo-frame img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-frame.reveal.visible {
+      transform: translate3d(0, var(--hero-photo-shift, 0px), 0);
+    }
+    .photo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(var(--hero-photo-scale, 1));
+      transition: transform .4s ease;
+    }
     .photo-placeholder {
       width: 100%; height: 100%;
       background: var(--white);
@@ -159,8 +371,18 @@
 
     /* ── 공통 섹션 ─────────────────────────────────── */
     .sec { padding: 64px 32px; }
-    .sec-cream { background: var(--cream); }
-    .sec-white { background: var(--white); }
+    .sec-cream {
+      background-color: var(--cream);
+      background-image: var(--paper-light);
+      background-size: 180px 180px, 220px 220px, 14px 14px;
+    }
+    .sec-white {
+      background-color: var(--white);
+      background-image:
+        linear-gradient(180deg, rgba(255,255,255,.28), transparent 34%),
+        var(--paper-light);
+      background-size: auto, 180px 180px, 220px 220px, 14px 14px;
+    }
 
     .sec-title {
       font-family: 'Noto Serif KR', serif;
@@ -207,6 +429,11 @@
       border: 1px solid var(--border);
       padding: 28px 24px; text-align: center;
       position: relative;
+      background-color: rgba(253,250,243,.52);
+      background-image: var(--paper-light);
+      background-size: 160px 160px, 200px 200px, 12px 12px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.35);
+      border-radius: var(--radius-lg);
     }
     .party-card::before {
       content: 'PARTY NOTE';
@@ -250,6 +477,326 @@
       font-size: 11px; letter-spacing: 1px; color: var(--ink);
       margin-top: 6px; font-family: 'Cormorant Garamond', serif;
       font-style: italic;
+      border-radius: var(--radius-pill);
+    }
+
+    /* ── 럭키드로우 ─────────────────────────────────── */
+    .lucky-sec {
+      background-color: var(--ink);
+      background-image:
+        linear-gradient(180deg, rgba(255,255,255,.035), transparent 44%),
+        var(--paper-dark);
+      background-size: auto, 180px 180px, 220px 220px, 16px 16px;
+      color: var(--cream);
+      position: relative;
+      overflow: hidden;
+    }
+    .lucky-sec::before {
+      content: '';
+      position: absolute;
+      inset: 20px;
+      border: 1px solid rgba(244,239,226,.16);
+      pointer-events: none;
+    }
+    .lucky-head {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      margin-bottom: 34px;
+    }
+    .lucky-kicker {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 13px;
+      color: rgba(244,239,226,.45);
+      letter-spacing: 4px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+    .lucky-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 24px;
+      font-weight: 300;
+      color: var(--cream);
+      letter-spacing: 5px;
+      margin-bottom: 14px;
+    }
+    .lucky-copy {
+      font-size: 13px;
+      color: rgba(244,239,226,.76);
+      line-height: 2;
+      word-break: keep-all;
+      font-weight: 300;
+    }
+    .prize-list {
+      display: grid;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+      margin-bottom: 24px;
+    }
+    .prize-card {
+      display: grid;
+      grid-template-columns: 54px 1fr auto;
+      align-items: center;
+      gap: 14px;
+      padding: 14px;
+      background-color: rgba(244,239,226,.07);
+      background-image: var(--paper-dark);
+      background-size: 160px 160px, 200px 200px, 14px 14px;
+      border: 1px solid rgba(244,239,226,.16);
+      border-radius: var(--radius-lg);
+    }
+    .prize-rank {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 15px;
+      letter-spacing: 1px;
+    }
+    .prize-name {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 16px;
+      color: rgba(244,239,226,.96);
+      margin-bottom: 4px;
+      font-weight: 300;
+    }
+    .prize-note {
+      font-size: 11px;
+      color: rgba(244,239,226,.62);
+      line-height: 1.6;
+    }
+    .prize-count {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 13px;
+      color: rgba(216,180,106,.86);
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+    .ticket-card {
+      position: relative;
+      z-index: 1;
+      background-color: var(--cream);
+      background-image:
+        linear-gradient(135deg, rgba(255,255,255,.34), transparent 48%),
+        var(--paper-light);
+      background-size: auto, 160px 160px, 200px 200px, 12px 12px;
+      color: var(--ink);
+      border-radius: var(--radius-xl);
+      padding: 24px 20px;
+      text-align: center;
+      box-shadow: 0 18px 40px rgba(0,0,0,.26);
+    }
+    .ticket-card::before,
+    .ticket-card::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--ink);
+      transform: translateY(-50%);
+    }
+    .ticket-card::before { left: -10px; }
+    .ticket-card::after { right: -10px; }
+    .ticket-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 12px;
+      color: var(--ink-l);
+      letter-spacing: 3px;
+      margin-bottom: 10px;
+    }
+    .ticket-machine {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      margin: 8px auto 16px;
+      padding: 10px 8px 12px;
+      position: relative;
+      border-radius: 22px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.4), rgba(24,20,14,.04)),
+        rgba(255,255,255,.34);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.86),
+        inset 0 -1px 0 rgba(24,20,14,.08);
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+    .ticket-machine::before {
+      content: '';
+      position: absolute;
+      left: 78px;
+      right: 10px;
+      top: 50%;
+      height: 24px;
+      transform: translateY(-50%);
+      border-top: 1px solid rgba(200,79,91,.28);
+      border-bottom: 1px solid rgba(200,79,91,.28);
+      background: rgba(255,255,255,.22);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .ticket-machine::after {
+      content: '';
+      position: absolute;
+      inset: 5px;
+      border: 1px solid rgba(24,20,14,.08);
+      border-radius: 18px;
+      pointer-events: none;
+    }
+    .ticket-prefix,
+    .ticket-separator {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 34px;
+      line-height: 1;
+      color: rgba(24,20,14,.78);
+      letter-spacing: 2px;
+      position: relative;
+      z-index: 3;
+    }
+    .ticket-reel {
+      width: 42px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      z-index: 3;
+      border-radius: 18px;
+      border: 1px solid rgba(24,20,14,.16);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.92), rgba(244,239,226,.72)),
+        var(--paper-light);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.9),
+        inset 0 -10px 18px rgba(24,20,14,.08),
+        0 10px 24px rgba(24,20,14,.1);
+      perspective: 500px;
+      transform: translateZ(0);
+    }
+    .ticket-reel::before,
+    .ticket-reel::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .ticket-reel::before {
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(244,239,226,.95), transparent 29%, transparent 67%, rgba(244,239,226,.92)),
+        linear-gradient(90deg, rgba(24,20,14,.08), transparent 22%, transparent 78%, rgba(24,20,14,.08));
+    }
+    .ticket-reel::after {
+      top: 50%;
+      height: 28px;
+      transform: translateY(-50%);
+      border-top: 1px solid rgba(255,255,255,.72);
+      border-bottom: 1px solid rgba(24,20,14,.1);
+      background: rgba(255,255,255,.18);
+      opacity: .72;
+    }
+    .ticket-reel-digit {
+      position: absolute;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      font-family: 'Cormorant Garamond', serif;
+      line-height: 1;
+      color: var(--ink);
+      text-shadow: 0 1px 0 rgba(255,255,255,.72);
+      font-variant-numeric: tabular-nums;
+      pointer-events: none;
+      user-select: none;
+      transform-origin: center;
+    }
+    .ticket-reel-digit--current {
+      top: 50%;
+      height: 48px;
+      transform: translateY(-50%);
+      font-size: 46px;
+      z-index: 3;
+    }
+    .ticket-reel-digit--prev,
+    .ticket-reel-digit--next {
+      height: 24px;
+      font-size: 28px;
+      opacity: .25;
+      z-index: 1;
+      filter: blur(.25px);
+    }
+    .ticket-reel-digit--prev {
+      top: 1px;
+      transform: translateY(-5px) scale(.88);
+    }
+    .ticket-reel-digit--next {
+      bottom: 1px;
+      transform: translateY(5px) scale(.88);
+    }
+    .ticket-machine.is-spinning .ticket-reel {
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.92),
+        inset 0 -14px 22px rgba(24,20,14,.12),
+        0 0 0 1px rgba(216,180,106,.2),
+        0 14px 28px rgba(24,20,14,.12);
+      animation: ticket-reel-vibration .11s steps(2, end) infinite;
+    }
+    .ticket-machine.is-spinning .ticket-reel-digit--current {
+      animation: ticket-digit-pop .075s linear infinite;
+    }
+    .ticket-machine.is-spinning .ticket-reel:nth-child(3) { animation-duration: .09s; }
+    .ticket-machine.is-spinning .ticket-reel:nth-child(4) { animation-duration: .13s; }
+    .ticket-machine.is-spinning .ticket-reel:nth-child(5) { animation-duration: .1s; }
+    .ticket-machine.is-spinning .ticket-reel:nth-child(6) { animation-duration: .12s; }
+    @keyframes ticket-reel-vibration {
+      0% { transform: translateY(-1px) rotateX(.6deg); }
+      100% { transform: translateY(1px) rotateX(-.6deg); }
+    }
+    @keyframes ticket-digit-pop {
+      0% { opacity: .42; transform: translateY(-50%) scale(.92); filter: blur(.9px); }
+      100% { opacity: 1; transform: translateY(-50%) scale(1); filter: blur(.08px); }
+    }
+    .ticket-help {
+      font-size: 12px;
+      color: var(--ink-l);
+      line-height: 1.8;
+      word-break: keep-all;
+    }
+    .btn-ticket {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      margin-top: 18px;
+      padding: 14px;
+      background: var(--ink);
+      color: var(--cream);
+      border: 1px solid var(--ink);
+      border-radius: var(--radius-md);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      cursor: pointer;
     }
 
     /* ── 지도 ──────────────────────────────────────── */
@@ -258,12 +805,14 @@
       border: 1px solid var(--border);
       margin-bottom: 20px;
       overflow: hidden;
-      border-radius: 2px;
+      border-radius: var(--radius-lg);
+      background-color: var(--white);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.28);
     }
 
     .btn-map {
       display: flex; align-items: center; justify-content: center; gap: 10px;
-      width: 100%; padding: 15px; border-radius: 2px;
+      width: 100%; padding: 15px; border-radius: var(--radius-md);
       font-family: 'Noto Sans KR', sans-serif; font-size: 14px;
       cursor: pointer; text-decoration: none; margin-bottom: 10px;
       transition: opacity .2s; border: none; font-weight: 400;
@@ -287,150 +836,387 @@
     }
 
     /* ══════════════════════════════════════════════════
-       나는 솔로 — TV 쇼 스타일
+       나는 솔로 — 웨딩 매칭 데스크
     ══════════════════════════════════════════════════ */
-    .solo-sec { background: var(--solo-bg); position: relative; overflow: hidden; }
+    .solo-sec {
+      background-color: var(--solo-bg);
+      background-image:
+        linear-gradient(180deg, rgba(255,255,255,.035), transparent 50%),
+        var(--paper-dark);
+      background-size: auto, 180px 180px, 220px 220px, 16px 16px;
+      color: var(--solo-cream);
+      position: relative;
+      overflow: hidden;
+    }
+    .solo-sec::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(rgba(248,241,229,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(248,241,229,.025) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+    }
 
     .solo-intro {
-      padding: 64px 28px 40px; text-align: center;
-      background: linear-gradient(180deg, #1A0830 0%, #0C0A18 100%);
+      padding: 42px 20px 36px; text-align: center;
       position: relative;
+      z-index: 1;
     }
-    .stars-bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-    .star-dot { position: absolute; background: white; border-radius: 50%; animation: twinkle 3s ease-in-out infinite; }
-    @keyframes twinkle { 0%,100% { opacity: .12; } 50% { opacity: .8; } }
+    .solo-intro::before,
+    .solo-intro::after {
+      content: '';
+      display: block;
+      width: 42px;
+      height: 1px;
+      background: rgba(216,180,106,.45);
+      margin: 0 auto;
+    }
+    .solo-intro::before { margin-bottom: 20px; }
+    .solo-intro::after { margin-top: 28px; }
 
     .solo-logo {
-      display: inline-flex; align-items: baseline; gap: 5px; margin-bottom: 14px;
+      display: grid;
+      gap: 4px;
+      justify-items: center;
+      margin: 0 auto 14px;
+      text-align: center;
     }
     .solo-naneun {
-      font-family: 'Noto Serif KR', serif; font-size: 20px;
-      color: rgba(255,255,255,.8); font-weight: 300;
+      font-family: 'Noto Serif KR', serif;
+      font-size: 14px;
+      color: rgba(248,241,229,.72);
+      font-weight: 300;
+      letter-spacing: 6px;
     }
     .solo-word {
-      font-family: 'Noto Sans KR', sans-serif;
-      font-size: 30px; font-weight: 900;
-      color: var(--solo-pk); letter-spacing: -1px;
-      text-shadow: 0 0 18px rgba(255,61,107,.45);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 54px;
+      font-weight: 400;
+      color: var(--solo-cream);
+      letter-spacing: 8px;
+      line-height: .9;
+      text-shadow: none;
     }
     .solo-official {
-      display: inline-block; padding: 4px 14px; margin-bottom: 20px;
-      border: 1px solid rgba(255,61,107,.45);
-      font-size: 10px; color: var(--solo-pk);
-      letter-spacing: 2px; border-radius: 2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 14px;
+      margin: 0 auto 18px;
+      border: 1px solid var(--solo-line);
+      border-radius: 999px;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 12px;
+      color: rgba(248,241,229,.78);
+      letter-spacing: 2px;
     }
     .solo-sub {
-      font-size: 13.5px; color: rgba(255,255,255,.7);
-      line-height: 2; word-break: keep-all;
+      font-size: 14px;
+      color: rgba(248,241,229,.78);
+      line-height: 1.9;
+      word-break: keep-all;
+      font-weight: 300;
+      margin-top: 24px;
     }
-    .solo-sub strong { color: #FFD580; font-weight: 500; }
+    .solo-sub strong { color: var(--solo-gold); font-weight: 400; }
 
     /* 카드 */
+    .solo-profile-panel {
+      margin-top: 18px;
+      position: relative;
+      z-index: 1;
+    }
     .solo-cards-label {
-      font-size: 10px; color: rgba(255,255,255,.35);
-      letter-spacing: 3px; text-align: center;
-      padding: 8px 28px 16px;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 15px;
+      color: rgba(248,241,229,.78);
+      letter-spacing: 2.4px;
+      text-align: center;
+      padding: 0 0 14px;
+      position: relative; z-index: 1;
     }
     .solo-cards-wrap {
-      display: flex; gap: 0; overflow-x: auto;
-      padding: 0 16px; scrollbar-width: none;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      overflow: visible;
+      padding: 0 0 2px;
+      position: relative; z-index: 1;
     }
     .solo-cards-wrap::-webkit-scrollbar { display: none; }
-    .solo-cards-wrap::after { content: ''; flex-shrink: 0; width: 8px; }
+    .solo-cards-wrap::after { display: none; }
 
     .s-card {
-      flex-shrink: 0; width: 210px; margin-right: 10px;
-      border-radius: 8px; overflow: hidden;
-      background: linear-gradient(180deg, #1E1030 0%, #2A1548 60%, #180D28 100%);
-      border: 1px solid rgba(255,255,255,.1);
+      width: 100%;
+      min-height: 0;
+      border-radius: 22px;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.35), transparent 42%),
+        var(--paper-light),
+        var(--solo-cream);
+      background-size: auto, 150px 150px, 190px 190px, 12px 12px;
+      color: var(--ink);
+      border: 1px solid rgba(248,241,229,.36);
+      box-shadow: 0 14px 30px rgba(0,0,0,.22);
     }
     .s-card::before {
-      content: ''; display: block; position: absolute; inset: 0;
-      background: radial-gradient(circle at 70% 30%, rgba(255,61,107,.12) 0%, transparent 60%);
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 5px;
+      background: var(--solo-red);
+    }
+    .s-card::after {
+      content: '';
+      position: absolute;
+      inset: 8px;
+      border: 1px solid rgba(214,204,188,.58);
+      border-radius: var(--radius-md);
       pointer-events: none;
     }
     .s-card-top {
       display: flex; justify-content: space-between;
-      align-items: flex-start; padding: 10px 12px 0;
+      align-items: flex-start; padding: 14px 16px 0;
+      position: relative;
+      z-index: 1;
     }
     .s-show-logo {
-      font-family: 'Noto Serif KR', serif;
-      font-size: 12px; color: rgba(255,255,255,.55); font-weight: 300;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 14px;
+      color: var(--ink-l);
+      font-weight: 300;
+      letter-spacing: 1px;
     }
     .s-show-logo b {
       font-family: 'Noto Sans KR', sans-serif;
-      font-weight: 900; color: var(--solo-pk); font-size: 13px; font-style: normal;
+      font-weight: 700;
+      color: var(--solo-red);
+      font-size: 12px;
+      font-style: normal;
+      letter-spacing: .5px;
     }
-    .s-brand { font-size: 9px; color: rgba(255,255,255,.3); letter-spacing: .5px; text-align: right; line-height: 1.5; }
-    .s-card-body { padding: 10px 14px 18px; }
+    .s-brand {
+      font-size: 9px;
+      color: var(--ink-l);
+      letter-spacing: 1.4px;
+      text-align: right;
+      line-height: 1.5;
+      text-transform: uppercase;
+    }
+    .s-card-body {
+      display: grid;
+      grid-template-columns: 54px 1fr;
+      column-gap: 12px;
+      align-items: start;
+      padding: 10px 16px 16px;
+      position: relative;
+      z-index: 1;
+    }
     .s-avatar {
-      width: 52px; height: 52px; border-radius: 50%;
-      background: linear-gradient(135deg, rgba(255,61,107,.5), rgba(140,70,180,.5));
-      border: 1.5px solid rgba(255,255,255,.2);
+      grid-row: 1 / span 5;
+      width: 54px; height: 54px; border-radius: 19px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.72), rgba(216,180,106,.16)),
+        #F3E9D9;
+      border: 1px solid var(--border);
       display: flex; align-items: center; justify-content: center;
-      font-size: 26px; margin-bottom: 10px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 14px;
+      font-style: italic;
+      color: var(--solo-red);
+      letter-spacing: 1px;
+      line-height: 1;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.78);
     }
     .s-tagline {
-      font-size: 11px; color: rgba(255,255,255,.55);
-      font-style: italic; line-height: 1.65; margin-bottom: 8px;
+      font-family: 'Noto Serif KR', serif;
+      font-size: 12px;
+      color: var(--ink-m);
+      line-height: 1.45;
+      margin: 0 0 4px;
+      font-weight: 300;
     }
-    .s-tagline .hl { color: var(--solo-pk); font-style: normal; font-weight: 700; }
+    .s-tagline .hl { color: var(--solo-red); font-style: normal; font-weight: 500; }
     .s-name {
-      font-family: 'Noto Sans KR', sans-serif;
-      font-size: 20px; font-weight: 900; color: white; margin-bottom: 3px;
+      font-family: 'Noto Serif KR', serif;
+      font-size: 22px; font-weight: 400; color: var(--ink); margin-bottom: 3px;
     }
-    .s-info { font-size: 11px; color: rgba(255,255,255,.45); margin-bottom: 6px; }
+    .s-info { font-size: 12px; color: var(--ink-l); margin-bottom: 7px; }
     .s-mbti {
-      display: inline-block; padding: 2px 8px;
-      border: 1px solid rgba(255,61,107,.45);
-      border-radius: 2px; font-size: 10px; color: #FF8CA8; margin-bottom: 8px;
+      justify-self: start;
+      display: inline-block; padding: 3px 9px;
+      border: 1px solid rgba(200,79,91,.42);
+      border-radius: 999px; font-size: 10px; color: var(--solo-red); margin-bottom: 7px;
       letter-spacing: 1px;
     }
-    .s-intro { font-size: 11px; color: rgba(255,255,255,.6); line-height: 1.65; }
+    .s-intro {
+      font-size: 12px;
+      color: var(--ink-m);
+      line-height: 1.55;
+      word-break: keep-all;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
 
     /* 폼 */
-    .solo-form-wrap { padding: 24px 20px 64px; }
+    .solo-form-wrap { padding: 30px 20px 72px; position: relative; z-index: 1; }
     .solo-form {
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.1);
-      border-radius: 4px; padding: 28px 20px;
+      position: relative;
+      background-color: var(--solo-cream);
+      background-image:
+        linear-gradient(135deg, rgba(255,255,255,.34), transparent 44%),
+        var(--paper-light);
+      background-size: auto, 150px 150px, 190px 190px, 12px 12px;
+      color: var(--ink);
+      border: 1px solid rgba(248,241,229,.38);
+      border-radius: var(--radius-lg); padding: 34px 20px 22px;
+      box-shadow: 0 18px 42px rgba(0,0,0,.24);
+    }
+    .solo-form::before {
+      content: 'APPLICATION CARD';
+      position: absolute;
+      top: -9px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 0 12px;
+      background: var(--solo-cream);
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: var(--ink-l);
+      white-space: nowrap;
     }
     .solo-form-title {
       font-family: 'Noto Serif KR', serif;
-      font-size: 20px; font-weight: 300;
-      color: #FFD580; text-align: center; margin-bottom: 4px;
-      letter-spacing: 4px;
+      font-size: 22px; font-weight: 300;
+      color: var(--ink); text-align: center; margin-bottom: 8px;
+      letter-spacing: 3px;
+      position: relative;
     }
-    .solo-form-sub { font-size: 11px; color: rgba(255,255,255,.4); text-align: center; margin-bottom: 24px; letter-spacing: 1px; }
+    .solo-form-title::after {
+      content: '';
+      display: block;
+      width: 30px;
+      height: 1px;
+      background: var(--solo-red);
+      margin: 13px auto 0;
+    }
+    .solo-form-sub { font-size: 12px; color: var(--ink-l); text-align: center; margin: 0 0 28px; letter-spacing: .4px; line-height: 1.8; }
     .fg { margin-bottom: 14px; }
-    .fg-label { display: block; font-size: 10px; color: rgba(255,255,255,.45); letter-spacing: 2px; margin-bottom: 7px; text-transform: uppercase; }
+    .fg-label { display: block; font-size: 10px; color: var(--ink-l); letter-spacing: 2px; margin-bottom: 7px; text-transform: uppercase; }
     .fg-input, .fg-textarea {
       width: 100%; padding: 13px 14px;
-      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.15);
-      border-radius: 2px; font-family: 'Noto Sans KR', sans-serif;
-      font-size: 14px; color: white; outline: none; transition: border-color .2s;
+      background: #FFF9EF; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-family: 'Noto Sans KR', sans-serif;
+      font-size: 14px; color: var(--ink); outline: none; transition: border-color .2s, background .2s, box-shadow .2s;
       -webkit-appearance: none;
     }
-    .fg-input::placeholder, .fg-textarea::placeholder { color: rgba(255,255,255,.25); }
-    .fg-input:focus, .fg-textarea:focus { border-color: var(--solo-pk); }
+    .fg-input::placeholder, .fg-textarea::placeholder { color: #B8AEA2; }
+    .fg-input[type="number"]::-webkit-outer-spin-button,
+    .fg-input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .fg-input[type="number"] { -moz-appearance: textfield; }
+    .fg-input:focus, .fg-textarea:focus {
+      border-color: var(--solo-red);
+      background: #FFFCF6;
+      box-shadow: 0 0 0 3px rgba(200,79,91,.08);
+    }
     .fg-textarea { resize: none; min-height: 88px; line-height: 1.65; }
     .fg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .radio-group { display: flex; gap: 20px; }
-    .radio-label {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 13.5px; color: rgba(255,255,255,.75); cursor: pointer;
+    .radio-group {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      padding: 5px;
+      border: 1px solid rgba(214,204,188,.9);
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.55), rgba(244,239,226,.4)),
+        var(--paper-light);
     }
-    .radio-label input { accent-color: var(--solo-pk); width: 15px; height: 15px; }
+    .radio-label {
+      position: relative;
+      min-height: 46px;
+      display: block;
+      font-size: 13.5px; color: var(--ink-m); cursor: pointer;
+      font-weight: 500;
+      letter-spacing: .2px;
+    }
+    .radio-label input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 2;
+    }
+    .radio-option {
+      min-height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: 14px;
+      transition: background .2s ease, color .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+    .radio-option::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1px solid rgba(24,20,14,.28);
+      background: rgba(255,255,255,.5);
+    }
+    .radio-label.is-selected .radio-option {
+      background: var(--ink);
+      color: var(--cream);
+      box-shadow: 0 10px 24px rgba(24,20,14,.16), inset 0 0 0 1px rgba(244,239,226,.12);
+    }
+    .radio-label.is-selected .radio-option::before {
+      background: var(--solo-gold);
+      border-color: var(--solo-gold);
+      box-shadow: 0 0 0 3px rgba(216,180,106,.24);
+    }
+    @supports selector(:has(*)) {
+      .radio-label:has(input:checked) .radio-option {
+        background: var(--ink);
+        color: var(--cream);
+        box-shadow: 0 10px 24px rgba(24,20,14,.16), inset 0 0 0 1px rgba(244,239,226,.12);
+      }
+      .radio-label:has(input:checked) .radio-option::before {
+        background: var(--solo-gold);
+        border-color: var(--solo-gold);
+        box-shadow: 0 0 0 3px rgba(216,180,106,.24);
+      }
+      .radio-label:has(input:focus-visible) {
+        outline: 2px solid var(--ink);
+        outline-offset: 3px;
+      }
+    }
     .btn-solo {
       display: flex; align-items: center; justify-content: center; gap: 8px;
       width: 100%; padding: 16px;
-      background: var(--solo-pk); color: white;
-      border: none; border-radius: 2px;
+      background: var(--ink); color: var(--cream);
+      border: 1px solid var(--ink); border-radius: var(--radius-md);
       font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700;
       cursor: pointer; margin-top: 8px; letter-spacing: 1px;
-      transition: opacity .2s;
+      transition: background .2s, transform .2s;
+      box-shadow: inset 0 0 0 1px rgba(244,239,226,.18);
     }
-    .btn-solo:hover { opacity: .9; }
+    .btn-solo:hover { background: #2A241B; }
+    .btn-solo:active { transform: translateY(1px); }
 
     /* ── 푸터 ──────────────────────────────────────── */
     .footer {
@@ -452,6 +1238,7 @@
       display: inline-flex; align-items: center; gap: 6px;
       padding: 11px 18px;
       border: 1px solid rgba(255,255,255,.2);
+      border-radius: var(--radius-pill);
       color: rgba(255,255,255,.8); font-size: 13px;
       text-decoration: none; font-family: 'Noto Sans KR', sans-serif;
       font-weight: 300; transition: border-color .2s; letter-spacing: .5px;
@@ -462,14 +1249,68 @@
   </style>
 </head>
 <body>
+<div class="page-progress" aria-hidden="true"><div class="page-progress__bar"></div></div>
+
+<svg class="icon-sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="icon-check" viewBox="0 0 64 64">
+    <path d="M32 6C17.6 6 6 17.6 6 32s11.6 26 26 26 26-11.6 26-26S46.4 6 32 6Z" fill="currentColor" opacity=".14"/>
+    <path d="M21 32.5 29 40l15-17" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M45 13c3.5 2.1 6 5.2 7.4 9" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".34"/>
+  </symbol>
+  <symbol id="icon-message" viewBox="0 0 64 64">
+    <path d="M12 17.5c0-5 4-9 9-9h22c5 0 9 4 9 9v17c0 5-4 9-9 9H28.5L14 54V43.5h-2c-5 0-9-4-9-9v-17Z" fill="currentColor" opacity=".16"/>
+    <path d="M15 15h30c3.3 0 6 2.7 6 6v18c0 3.3-2.7 6-6 6H29L17 53v-8h-2c-3.3 0-6-2.7-6-6V21c0-3.3 2.7-6 6-6Z" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M21 27h22M21 35h14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".72"/>
+    <circle cx="45" cy="20" r="5" fill="currentColor" opacity=".28"/>
+  </symbol>
+  <symbol id="icon-gift" viewBox="0 0 64 64">
+    <path d="M13 28h38v21c0 4.4-3.6 8-8 8H21c-4.4 0-8-3.6-8-8V28Z" fill="currentColor" opacity=".15"/>
+    <path d="M10 24h44v10H10V24Z" fill="currentColor" opacity=".28"/>
+    <path d="M16 34h32v17c0 2.8-2.2 5-5 5H21c-2.8 0-5-2.2-5-5V34Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M9 24h46v10H9V24ZM32 24v32" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M31 23s-14-2-12-9c1.5-5.2 9.5-2.3 12 9ZM33 23s14-2 12-9c-1.5-5.2-9.5-2.3-12 9Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="icon-ticket" viewBox="0 0 64 64">
+    <path d="M10 22c0-4.4 3.6-8 8-8h28c4.4 0 8 3.6 8 8v5.4a6.6 6.6 0 0 0 0 13.2V46c0 4.4-3.6 8-8 8H18c-4.4 0-8-3.6-8-8v-5.4a6.6 6.6 0 0 0 0-13.2V22Z" fill="currentColor" opacity=".16"/>
+    <path d="M12 22c0-4.4 3.6-8 8-8h24c4.4 0 8 3.6 8 8v5.4a6.6 6.6 0 0 0 0 13.2V46c0 4.4-3.6 8-8 8H20c-4.4 0-8-3.6-8-8v-5.4a6.6 6.6 0 0 0 0-13.2V22Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M24 26h16M24 37h12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+    <path d="m42 35 2 4 4 .6-3 3 .8 4.2-3.8-2-3.8 2 .8-4.2-3-3 4-.6 2-4Z" fill="currentColor" opacity=".36"/>
+  </symbol>
+  <symbol id="icon-map" viewBox="0 0 64 64">
+    <path d="m9 18 14-6 18 6 14-6v36l-14 6-18-6-14 6V18Z" fill="currentColor" opacity=".14"/>
+    <path d="m10 17 14-6 17 6 13-6v36l-13 6-17-6-14 6V17Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M24 11v36M41 17v36" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".58"/>
+    <path d="M18 38c7-10 17 6 28-9" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="18" cy="38" r="3" fill="currentColor"/>
+    <circle cx="46" cy="29" r="3" fill="currentColor"/>
+  </symbol>
+  <symbol id="icon-location" viewBox="0 0 64 64">
+    <path d="M32 58s20-17.6 20-34C52 13 43 5 32 5S12 13 12 24c0 16.4 20 34 20 34Z" fill="currentColor" opacity=".16"/>
+    <path d="M32 57s19-17 19-33C51 13.5 42.5 6 32 6S13 13.5 13 24c0 16 19 33 19 33Z" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/>
+    <circle cx="32" cy="24" r="8.5" fill="currentColor" opacity=".26"/>
+    <circle cx="32" cy="24" r="4.2" fill="currentColor"/>
+  </symbol>
+  <symbol id="icon-phone" viewBox="0 0 64 64">
+    <path d="M32 6C17.6 6 6 17.6 6 32s11.6 26 26 26 26-11.6 26-26S46.4 6 32 6Z" fill="currentColor" opacity=".14"/>
+    <path d="M24 18.5 30 25c1.4 1.5 1.6 3.7.4 5.4l-2.2 3.1a24 24 0 0 0 10.3 10.3l3.1-2.2c1.7-1.2 3.9-1 5.4.4l6.5 6c1.7 1.6 1.8 4.3.2 6-2.3 2.4-5.3 4.1-9.3 3.4C26.8 54.4 9.6 37.2 6.6 19.6c-.7-4 1-7 3.4-9.3 1.7-1.6 4.4-1.5 6 .2Z" transform="translate(2 0) scale(.84)" fill="currentColor" opacity=".24"/>
+    <path d="M20 15.5 26.5 22a4.3 4.3 0 0 1 .5 5.2l-2.5 3.7a26.8 26.8 0 0 0 11.6 11.6l3.7-2.5a4.3 4.3 0 0 1 5.2.5l6.5 6.5a4.2 4.2 0 0 1 .1 5.8c-2.4 2.7-5.8 4.8-10.2 4C23 53.6 10.4 41 7.2 22.6c-.8-4.4 1.3-7.8 4-10.2a4.2 4.2 0 0 1 5.8.1Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="icon-palette" viewBox="0 0 64 64">
+    <path d="M17 18h26a7 7 0 0 1 7 7v26H24a7 7 0 0 1-7-7V18Z" fill="currentColor" opacity=".14"/>
+    <path d="M14 14h27a9 9 0 0 1 9 9v27H23a9 9 0 0 1-9-9V14Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M24 22h16M24 31h10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="24" cy="43" r="4" fill="currentColor" opacity=".32"/>
+    <circle cx="36" cy="43" r="4" fill="currentColor" opacity=".55"/>
+  </symbol>
+</svg>
 
 <!-- 모달 -->
-<div class="modal-overlay" id="modal">
+<div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="modal-title" aria-describedby="modal-body">
   <div class="modal">
-    <span class="modal-icon" id="modal-icon">🎉</span>
+    <span class="modal-icon" id="modal-icon"></span>
     <div class="modal-title" id="modal-title"></div>
     <div class="modal-body"  id="modal-body"></div>
-    <button class="btn-modal-close" onclick="closeModal()">확인</button>
+    <button class="btn-modal-close" type="button" onclick="closeModal()">확인</button>
   </div>
 </div>
 
@@ -478,7 +1319,7 @@
   <div class="hero-names-en reveal">Jung-hoon &amp; Woon-jin</div>
 
   <div class="photo-frame reveal">
-    <img src="wedding.jpg" alt="함정훈 박운진 웨딩 사진"
+    <img src="wedding.jpg" alt="함정훈 박운진 웨딩 사진" width="200" height="260" decoding="async" fetchpriority="high"
          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
     <div class="photo-placeholder" style="display:none">
       <span style="font-size:36px; opacity:.3">○</span>
@@ -619,7 +1460,9 @@
       <div class="d-label">Dress</div>
       <div>
         <div class="d-val">블루 &amp; 스카이블루</div>
-        <div class="d-sub">파란 계열로 함께해 주시면 더욱 예뻐요 💙</div>
+        <div class="d-sub">파란 계열로 함께해 주시면 더욱 예뻐요
+          <span class="dress-swatches" aria-hidden="true"><span></span><span></span><span></span></span>
+        </div>
       </div>
     </div>
     <div class="detail-row">
@@ -630,6 +1473,66 @@
         <span class="lucky-tag">당일 현장 추첨</span>
       </div>
     </div>
+  </div>
+</section>
+
+<hr class="thin-line">
+<div class="section-rule" style="padding:20px 32px"><span>lucky draw</span></div>
+<hr class="thin-line">
+
+<!-- ════ 럭키드로우 ════ -->
+<section class="sec lucky-sec" id="lucky">
+  <div class="lucky-head reveal">
+    <div class="lucky-kicker">Wedding Raffle</div>
+    <div class="lucky-title">럭 키 드 로 우</div>
+    <p class="lucky-copy">
+      축하하러 와주신 분들을 위해<br>
+      당일 현장에서 작은 선물을 추첨합니다.
+    </p>
+  </div>
+
+  <div class="prize-list reveal">
+    <div class="prize-card">
+      <div class="prize-rank">1st</div>
+      <div>
+        <div class="prize-name">AirPods Max</div>
+        <div class="prize-note">가장 큰 행운의 주인공에게</div>
+      </div>
+      <div class="prize-count">1명</div>
+    </div>
+    <div class="prize-card">
+      <div class="prize-rank">2nd</div>
+      <div>
+        <div class="prize-name">AirPods Pro</div>
+        <div class="prize-note">파티를 더 오래 기억할 선물</div>
+      </div>
+      <div class="prize-count">1명</div>
+    </div>
+    <div class="prize-card">
+      <div class="prize-rank">More</div>
+      <div>
+        <div class="prize-name">Surprise Gift</div>
+        <div class="prize-note">현장에서 공개되는 추가 경품</div>
+      </div>
+      <div class="prize-count">추가</div>
+    </div>
+  </div>
+
+  <div class="ticket-card reveal" id="ticket-card">
+    <div class="ticket-label">MY LUCKY NUMBER</div>
+    <div class="ticket-machine" id="ticket-number" aria-live="polite" aria-label="럭키드로우 추첨권 번호">
+      <span class="ticket-prefix">WJ</span>
+      <span class="ticket-separator">-</span>
+      <span class="ticket-reel"><span class="ticket-reel-digit">0</span></span>
+      <span class="ticket-reel"><span class="ticket-reel-digit">0</span></span>
+      <span class="ticket-reel"><span class="ticket-reel-digit">0</span></span>
+      <span class="ticket-reel"><span class="ticket-reel-digit">0</span></span>
+    </div>
+    <div class="ticket-help" id="ticket-help">추첨권 번호는 2026년 8월 9일 예식 당일에만 받을 수 있습니다.</div>
+    <button class="btn-ticket" type="button" onclick="issueLuckyTicket()">
+      <svg class="ui-icon" aria-hidden="true"><use href="#icon-ticket"></use></svg>
+      <span id="ticket-button-label">추첨권 번호 받기</span>
+    </button>
   </div>
 </section>
 
@@ -730,12 +1633,14 @@
     </svg>
   </div>
 
-  <a href="https://naver.me/55rmbsR7" target="_blank" class="btn-map btn-naver reveal">
-    <span>🗺</span> 네이버 지도로 보기
+  <a href="https://naver.me/55rmbsR7" target="_blank" rel="noopener noreferrer" class="btn-map btn-naver reveal">
+    <svg class="ui-icon" aria-hidden="true"><use href="#icon-map"></use></svg>
+    네이버 지도로 보기
   </a>
   <a href="https://map.kakao.com/?q=%EB%93%9C%EB%A0%88%EC%8A%A4%EA%B0%80%EB%93%A0%20%EA%B0%95%EB%82%A8%EA%B5%AC%20%EC%98%81%EB%8F%99%EB%8C%80%EB%A1%9C%20707"
-     target="_blank" class="btn-map btn-kakao reveal">
-    <span>🟡</span> 카카오맵으로 보기
+     target="_blank" rel="noopener noreferrer" class="btn-map btn-kakao reveal">
+    <svg class="ui-icon" aria-hidden="true"><use href="#icon-location"></use></svg>
+    카카오맵으로 보기
   </a>
 
   <div class="transport reveal">
@@ -759,83 +1664,86 @@
 <hr class="thin-line">
 
 <!-- ════ 나는 솔로 ════ -->
-<section class="solo-sec">
-  <div class="stars-bg" id="stars-bg"></div>
-
+<section class="solo-sec" id="solo">
   <div class="solo-intro">
     <div style="position:relative;z-index:1">
       <div class="solo-logo reveal">
         <span class="solo-naneun">나는</span>
         <span class="solo-word">SOLO</span>
       </div>
-      <div class="solo-official reveal">함정훈 · 박운진 Official</div>
+      <div class="solo-official reveal">Wedding Edition</div>
+      <div class="solo-profile-panel">
+        <div class="solo-cards-label" id="solo-cards-label">신청자 프로필</div>
+        <div class="solo-cards-wrap" id="solo-cards"></div>
+      </div>
+
       <p class="solo-sub reveal">
-        솔로인 당신을 위한 특별 코너<br>
+        결혼식장에서 특별한 자리를 마련해드릴께요.<br>
         <strong>신랑·신부 지인이라면 남녀 누구나</strong><br>
         좋은 인연을 찾고 싶다면 자기소개를 남겨주세요.<br>
-        두 사람이 직접 소개팅을 주선해 드릴게요 💘
+        행복한 인연을 만들어드릴께요.
       </p>
     </div>
   </div>
 
-  <div class="solo-cards-label reveal">— 참가자 프로필 —</div>
-  <div class="solo-cards-wrap reveal" id="solo-cards"></div>
-
   <div class="solo-form-wrap">
     <div class="solo-form reveal">
       <div class="solo-form-title">자기소개 신청</div>
-      <div class="solo-form-sub">신청 내용은 신랑·신부에게만 전달됩니다</div>
+      <div class="solo-form-sub">자세히 알려주실수록 좋은 분과 연결해드릴 수 있어요.<br>작성 후 아래의 버튼을 누르면 신청이 완료돼요.</div>
 
       <div class="fg-row">
         <div class="fg">
-          <label class="fg-label">이름 *</label>
-          <input class="fg-input" id="s-name" placeholder="홍길동" maxlength="10">
+          <label class="fg-label" for="s-name">이름 *</label>
+          <input class="fg-input" id="s-name" placeholder="홍길동" maxlength="10" autocomplete="name" required>
         </div>
         <div class="fg">
-          <label class="fg-label">나이 *</label>
-          <input class="fg-input" id="s-age" type="number" placeholder="28" min="20" max="50">
+          <label class="fg-label" for="s-age">나이 *</label>
+          <input class="fg-input" id="s-age" type="number" placeholder="28" min="20" max="55" step="1" inputmode="numeric" required>
         </div>
       </div>
 
       <div class="fg-row">
         <div class="fg">
-          <label class="fg-label">직업 *</label>
-          <input class="fg-input" id="s-job" placeholder="회사원" maxlength="20">
+          <label class="fg-label" for="s-job">직업 *</label>
+          <input class="fg-input" id="s-job" placeholder="회사원" maxlength="20" autocomplete="organization-title" required>
         </div>
         <div class="fg">
-          <label class="fg-label">MBTI</label>
-          <input class="fg-input" id="s-mbti" placeholder="ENFP" maxlength="4">
+          <label class="fg-label" for="s-mbti">MBTI</label>
+          <input class="fg-input" id="s-mbti" placeholder="ENFP" maxlength="4" autocapitalize="characters">
         </div>
       </div>
 
       <div class="fg">
         <label class="fg-label">성별 *</label>
         <div class="radio-group">
-          <label class="radio-label"><input type="radio" name="s-gender" value="남성"> 남성</label>
-          <label class="radio-label"><input type="radio" name="s-gender" value="여성"> 여성</label>
+          <label class="radio-label"><input type="radio" name="s-gender" value="남성"><span class="radio-option">남성</span></label>
+          <label class="radio-label"><input type="radio" name="s-gender" value="여성"><span class="radio-option">여성</span></label>
         </div>
       </div>
 
       <div class="fg">
         <label class="fg-label">신랑측 / 신부측 *</label>
         <div class="radio-group">
-          <label class="radio-label"><input type="radio" name="s-side" value="신랑측"> 신랑측</label>
-          <label class="radio-label"><input type="radio" name="s-side" value="신부측"> 신부측</label>
+          <label class="radio-label"><input type="radio" name="s-side" value="신랑측"><span class="radio-option">신랑측</span></label>
+          <label class="radio-label"><input type="radio" name="s-side" value="신부측"><span class="radio-option">신부측</span></label>
         </div>
       </div>
 
       <div class="fg">
-        <label class="fg-label">한줄 자기소개 *</label>
+        <label class="fg-label" for="s-intro">한줄 자기소개 *</label>
         <textarea class="fg-textarea" id="s-intro"
-          placeholder="저는 ___한 사람이에요. 이런 분을 찾고 있어요 ✨" maxlength="150"></textarea>
+          placeholder="저는 ___한 사람이에요. 이런 분을 찾고 있어요" maxlength="150" required></textarea>
       </div>
 
       <div class="fg">
-        <label class="fg-label">연락처 (선택 · 신랑신부에게만)</label>
-        <input class="fg-input" id="s-contact" type="tel" placeholder="010-0000-0000">
+        <label class="fg-label" for="s-contact">연락처 (선택 · 신랑신부에게만)</label>
+        <input class="fg-input" id="s-contact" type="tel" placeholder="010-0000-0000" autocomplete="tel">
       </div>
 
-      <button class="btn-solo" onclick="submitSolo()">❤ 나도 솔로 신청</button>
+      <button class="btn-solo" type="button" onclick="submitSolo()">
+        <svg class="ui-icon" aria-hidden="true"><use href="#icon-check"></use></svg>
+        신청 완료하기
+      </button>
     </div>
   </div>
 </section>
@@ -847,25 +1755,80 @@
   <div class="ft-date">2026 · 08 · 09</div>
   <div class="ft-contact-title">Contact</div>
   <div class="ft-btns">
-    <a href="tel:010-9432-0293" class="btn-call">신랑 함정훈</a>
-    <a href="tel:010-4189-1909" class="btn-call">신부 박운진</a>
+    <a href="tel:010-9432-0293" class="btn-call">
+      <svg class="ui-icon" aria-hidden="true"><use href="#icon-phone"></use></svg>
+      신랑 함정훈
+    </a>
+    <a href="tel:010-4189-1909" class="btn-call">
+      <svg class="ui-icon" aria-hidden="true"><use href="#icon-phone"></use></svg>
+      신부 박운진
+    </a>
   </div>
   <div class="ft-hosts">함상구 · 김미선 &nbsp;|&nbsp; 고현숙</div>
   <div class="ft-copy">Made with love for our special day</div>
 </footer>
 
 <script>
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 /* ── 스크롤 리빌 ─────────────────────────────────── */
 const revealObs = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
 }, { threshold: 0.06 });
-document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+document.querySelectorAll('.reveal').forEach((el, index) => {
+  el.style.setProperty('--reveal-delay', `${Math.min(index % 4, 3) * 70}ms`);
+  revealObs.observe(el);
+});
 setTimeout(() => {
   document.querySelectorAll('.hero .reveal').forEach(el => el.classList.add('visible'));
 }, 80);
 
+/* ── 전역 스크롤 감도 ─────────────────────────────── */
+const root = document.documentElement;
+const heroPhoto = document.querySelector('.photo-frame');
+let scrollTicking = false;
+
+function updateScrollInteractions() {
+  const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+  const progress = Math.min(1, Math.max(0, window.scrollY / maxScroll));
+  root.style.setProperty('--scroll-progress', progress.toFixed(4));
+
+  if (heroPhoto && !prefersReducedMotion) {
+    const heroShift = Math.min(18, window.scrollY * 0.035);
+    const heroScale = 1 + Math.min(0.035, window.scrollY * 0.00008);
+    heroPhoto.style.setProperty('--hero-photo-shift', `${heroShift}px`);
+    heroPhoto.style.setProperty('--hero-photo-scale', heroScale.toFixed(4));
+  }
+  scrollTicking = false;
+}
+
+function requestScrollUpdate() {
+  if (!scrollTicking) {
+    window.requestAnimationFrame(updateScrollInteractions);
+    scrollTicking = true;
+  }
+}
+
+window.addEventListener('scroll', requestScrollUpdate, { passive: true });
+window.addEventListener('resize', requestScrollUpdate);
+updateScrollInteractions();
+
+/* ── 버튼 터치 잔상 ───────────────────────────────── */
+document.querySelectorAll('button, .btn-map, .btn-call').forEach(el => {
+  el.addEventListener('pointerdown', event => {
+    if (prefersReducedMotion) return;
+    const rect = el.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'press-ripple';
+    ripple.style.left = `${event.clientX - rect.left}px`;
+    ripple.style.top = `${event.clientY - rect.top}px`;
+    el.appendChild(ripple);
+    ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
+  });
+});
+
 /* ── 카운트다운 ──────────────────────────────────── */
-const WEDDING = new Date('2026-08-09T14:30:00');
+const WEDDING = new Date('2026-08-09T14:30:00+09:00');
 function tick() {
   const diff = WEDDING - Date.now();
   if (diff <= 0) {
@@ -884,50 +1847,354 @@ function tick() {
 }
 tick(); setInterval(tick, 1000);
 
+/* ── 럭키드로우 ─────────────────────────────────── */
+const LUCKY_TICKET_KEY = 'wedding-lucky-ticket';
+const LUCKY_DEVICE_KEY = 'wedding-lucky-device';
+const LUCKY_TICKET_ENDPOINT = '';
+const LUCKY_TICKET_OPEN = new Date('2026-08-09T00:00:00+09:00');
+const LUCKY_TICKET_CLOSE = new Date('2026-08-10T00:00:00+09:00');
+let luckySpinTimer = null;
+let luckySpinStep = 0;
+
+function createLuckyTicketNumber() {
+  const array = new Uint32Array(1);
+  if (window.crypto && window.crypto.getRandomValues) {
+    window.crypto.getRandomValues(array);
+  } else {
+    array[0] = Math.floor(Math.random() * 100000);
+  }
+  return `WJ-${String(array[0] % 10000).padStart(4, '0')}`;
+}
+
+function createLuckyTicketPreviewNumber() {
+  return `WJ-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
+}
+
+function hydrateLuckyReels() {
+  const machineEl = document.getElementById('ticket-number');
+  if (!machineEl) return;
+  machineEl.querySelectorAll('.ticket-reel').forEach(reelEl => {
+    if (reelEl.querySelector('.ticket-reel-digit--current')) return;
+    const currentDigit = reelEl.textContent.replace(/\D/g, '').slice(-1) || '0';
+    reelEl.innerHTML = `
+      <span class="ticket-reel-digit ticket-reel-digit--prev" aria-hidden="true">${(Number(currentDigit) + 9) % 10}</span>
+      <span class="ticket-reel-digit ticket-reel-digit--current">${currentDigit}</span>
+      <span class="ticket-reel-digit ticket-reel-digit--next" aria-hidden="true">${(Number(currentDigit) + 1) % 10}</span>
+    `;
+  });
+}
+
+function paintLuckyReel(reelEl, digit) {
+  const safeDigit = Number.isFinite(digit) ? digit : 0;
+  const prevEl = reelEl.querySelector('.ticket-reel-digit--prev');
+  const currentEl = reelEl.querySelector('.ticket-reel-digit--current');
+  const nextEl = reelEl.querySelector('.ticket-reel-digit--next');
+  if (prevEl) prevEl.textContent = String((safeDigit + 9) % 10);
+  if (currentEl) currentEl.textContent = String(safeDigit);
+  if (nextEl) nextEl.textContent = String((safeDigit + 1) % 10);
+}
+
+function setLuckyTicketDisplay(number, spinning = false) {
+  const machineEl = document.getElementById('ticket-number');
+  if (!machineEl) return;
+  hydrateLuckyReels();
+  const digits = String(number || createLuckyTicketPreviewNumber()).replace(/\D/g, '').slice(-4).padStart(4, '0');
+  machineEl.querySelectorAll('.ticket-reel').forEach((reelEl, index) => {
+    const baseDigit = Number(digits[index] || '0');
+    if (spinning) {
+      const rollingDigit = (baseDigit + luckySpinStep * (index + 3) + index * 2) % 10;
+      paintLuckyReel(reelEl, rollingDigit);
+    } else {
+      paintLuckyReel(reelEl, baseDigit);
+    }
+  });
+  luckySpinStep += 1;
+  machineEl.setAttribute('aria-label', `럭키드로우 추첨권 번호 WJ-${digits}`);
+}
+
+function isLuckyTicketOpen(now = new Date()) {
+  return now >= LUCKY_TICKET_OPEN && now < LUCKY_TICKET_CLOSE;
+}
+
+function getLuckyDeviceId() {
+  let deviceId = localStorage.getItem(LUCKY_DEVICE_KEY);
+  if (!deviceId) {
+    deviceId = window.crypto && window.crypto.randomUUID
+      ? window.crypto.randomUUID()
+      : `device-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    localStorage.setItem(LUCKY_DEVICE_KEY, deviceId);
+  }
+  return deviceId;
+}
+
+async function requestLuckyTicketFromEndpoint() {
+  if (!LUCKY_TICKET_ENDPOINT) return null;
+
+  const response = await fetch(LUCKY_TICKET_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      deviceId: getLuckyDeviceId(),
+      userAgent: navigator.userAgent,
+      requestedAt: new Date().toISOString()
+    })
+  });
+  if (!response.ok) throw new Error(`Lucky ticket issue failed: ${response.status}`);
+
+  const data = await response.json();
+  if (!data || !/^WJ-\d{4}$/.test(data.number || '')) {
+    throw new Error('Lucky ticket endpoint returned an invalid number');
+  }
+
+  return {
+    number: data.number,
+    issuedAt: data.issuedAt || new Date().toISOString(),
+    ticketId: data.ticketId || null,
+    source: 'endpoint'
+  };
+}
+
+function stopLuckyTicketSpinner() {
+  if (luckySpinTimer) {
+    clearInterval(luckySpinTimer);
+    luckySpinTimer = null;
+  }
+}
+
+function startLuckyTicketSpinner() {
+  const numberEl = document.getElementById('ticket-number');
+  if (!numberEl || getLuckyTicket()) return;
+  stopLuckyTicketSpinner();
+  numberEl.classList.add('is-spinning');
+  setLuckyTicketDisplay(createLuckyTicketPreviewNumber(), true);
+  if (prefersReducedMotion) {
+    numberEl.classList.remove('is-spinning');
+    return;
+  }
+  luckySpinTimer = setInterval(() => {
+    setLuckyTicketDisplay(createLuckyTicketPreviewNumber(), true);
+  }, 45);
+}
+
+function renderLuckyTicket(ticket) {
+  const numberEl = document.getElementById('ticket-number');
+  const helpEl = document.getElementById('ticket-help');
+  const buttonLabel = document.getElementById('ticket-button-label');
+  if (!numberEl || !helpEl) return;
+  if (!ticket) {
+    helpEl.textContent = '추첨권 번호는 2026년 8월 9일 예식 당일에만 받을 수 있습니다.';
+    if (buttonLabel) buttonLabel.textContent = '8월 9일에 번호 받기';
+    startLuckyTicketSpinner();
+    return;
+  }
+  stopLuckyTicketSpinner();
+  numberEl.classList.remove('is-spinning');
+  setLuckyTicketDisplay(ticket.number);
+  helpEl.textContent = '추첨권이 준비됐습니다. 예식 당일 이 화면을 보여주세요.';
+  if (buttonLabel) buttonLabel.textContent = '내 추첨권 다시 보기';
+}
+
+function getLuckyTicket() {
+  try {
+    if (new Date() < LUCKY_TICKET_OPEN) {
+      localStorage.removeItem(LUCKY_TICKET_KEY);
+      return null;
+    }
+    const ticket = JSON.parse(localStorage.getItem(LUCKY_TICKET_KEY) || 'null');
+    if (!ticket) return null;
+    if (!/^WJ-\d{4}$/.test(ticket.number || '')) {
+      localStorage.removeItem(LUCKY_TICKET_KEY);
+      return null;
+    }
+    const issuedAt = ticket.issuedAt ? new Date(ticket.issuedAt) : null;
+    if (!isLuckyTicketOpen() && (!issuedAt || issuedAt < LUCKY_TICKET_OPEN)) {
+      localStorage.removeItem(LUCKY_TICKET_KEY);
+      return null;
+    }
+    return ticket;
+  } catch {
+    localStorage.removeItem(LUCKY_TICKET_KEY);
+    return null;
+  }
+}
+
+async function issueLuckyTicket() {
+  const savedTicket = getLuckyTicket();
+  if (savedTicket) {
+    renderLuckyTicket(savedTicket);
+    showModal('icon-ticket','이미 발급된 번호입니다',`${savedTicket.number}\n한 기기에서는 하나의 추첨권 번호만 유지됩니다.`);
+    return;
+  }
+
+  if (!isLuckyTicketOpen()) {
+    showModal('icon-ticket','8월 9일 당일에 추첨권을 받을 수 있어요','예식장에서 다시 눌러주세요.');
+    return;
+  }
+
+  let ticket;
+  try {
+    ticket = await requestLuckyTicketFromEndpoint();
+  } catch (error) {
+    console.error(error);
+    showModal('icon-ticket','발급을 다시 시도해주세요','추첨권 번호 발급 서버에 연결하지 못했습니다.\n잠시 후 다시 눌러주세요.');
+    return;
+  }
+
+  if (!ticket) {
+    ticket = {
+      number: createLuckyTicketNumber(),
+      issuedAt: new Date().toISOString(),
+      source: 'local'
+    };
+  }
+  localStorage.setItem(LUCKY_TICKET_KEY, JSON.stringify(ticket));
+  renderLuckyTicket(ticket);
+  showModal('icon-gift','추첨권 발급 완료',`${ticket.number}\n예식 당일 현장에서 이 화면을 보여주세요.`);
+}
+
+renderLuckyTicket(getLuckyTicket());
+
 /* ── 나는 솔로 ───────────────────────────────────── */
-const DEMO = [
-  { name:'영식', age:31, job:'건축가',  mbti:'ISTP', gender:'남성', side:'신랑측',
-    intro:'디테일에 강하고 손재주 있어요. 카페투어 좋아해요', avatar:'👨‍🎨',
+const SOLO_APPLICATIONS_KEY = 'wedding-solo-applications';
+const DUMMY_PROFILES = [
+  { alias:'영식', age:31, job:'건축가',  mbti:'ISTP', gender:'남성', side:'신랑측',
+    intro:'디테일에 강하고 손재주 있어요. 카페투어 좋아해요',
     tagline:'처음엔 과묵해 보여도' },
-  { name:'지수', age:28, job:'마케터',  mbti:'ENFP', gender:'여성', side:'신부측',
-    intro:'밝고 에너지 넘쳐요! 여행이랑 맛집 탐방이 취미예요', avatar:'👩‍💼',
+  { alias:'지수', age:28, job:'마케터',  mbti:'ENFP', gender:'여성', side:'신부측',
+    intro:'밝고 에너지 넘쳐요. 여행이랑 맛집 탐방이 취미예요',
     tagline:'한 번 웃기면 끝나는' },
-  { name:'준혁', age:33, job:'의사',    mbti:'INTJ', gender:'남성', side:'신랑측',
-    intro:'진지하고 책임감 있어요. 운동 좋아하고 요리도 해요', avatar:'👨‍⚕️',
+  { alias:'준혁', age:33, job:'의사',    mbti:'INTJ', gender:'남성', side:'신랑측',
+    intro:'진지하고 책임감 있어요. 운동 좋아하고 요리도 해요',
     tagline:'한눈에 들어오는' },
+  { alias:'서연', age:30, job:'디자이너', mbti:'INFJ', gender:'여성', side:'신부측',
+    intro:'차분한 대화와 전시 보는 시간을 좋아해요',
+    tagline:'은근히 다정한' },
+  { alias:'도윤', age:34, job:'기획자', mbti:'ENTJ', gender:'남성', side:'신랑측',
+    intro:'일도 취미도 진심인 편이에요. 주말엔 테니스 쳐요',
+    tagline:'계획까지 멋있는' },
 ];
+const SOLO_ALIAS_POOL = ['영수','영호','영식','영철','광수','상철','정숙','순자','영자','옥순','현숙','정희'];
+
+function createSoloAlias(index) {
+  const base = SOLO_ALIAS_POOL[index % SOLO_ALIAS_POOL.length];
+  const round = Math.floor(index / SOLO_ALIAS_POOL.length);
+  return round ? `${base} ${round + 1}` : base;
+}
+
+function getStoredSoloApplications() {
+  try {
+    const applications = JSON.parse(localStorage.getItem(SOLO_APPLICATIONS_KEY) || '[]');
+    if (!Array.isArray(applications)) return [];
+    let changed = false;
+    const safeApplications = applications.map((application, index) => {
+      if (application.alias) return application;
+      changed = true;
+      return { ...application, alias: createSoloAlias(index) };
+    });
+    if (changed) {
+      localStorage.setItem(SOLO_APPLICATIONS_KEY, JSON.stringify(safeApplications));
+    }
+    return safeApplications;
+  } catch {
+    localStorage.removeItem(SOLO_APPLICATIONS_KEY);
+    return [];
+  }
+}
+
+function saveSoloApplication(application) {
+  const applications = getStoredSoloApplications();
+  const applicationWithAlias = {
+    ...application,
+    alias: application.alias || createSoloAlias(applications.length)
+  };
+  applications.push(applicationWithAlias);
+  localStorage.setItem(SOLO_APPLICATIONS_KEY, JSON.stringify(applications));
+  return applicationWithAlias;
+}
 
 function getSoloList() {
-  return [...DEMO, ...JSON.parse(localStorage.getItem('solo-list') || '[]')];
+  return [...getStoredSoloApplications(), ...DUMMY_PROFILES].map((profile, index) => ({
+    ...profile,
+    alias: profile.alias || createSoloAlias(index),
+    avatar: `No. ${String(index + 1).padStart(2, '0')}`
+  }));
+}
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[char]));
 }
 function renderSoloCards() {
   const box = document.getElementById('solo-cards');
+  const label = document.getElementById('solo-cards-label');
+  const profiles = getSoloList();
+  if (label) label.textContent = '신청자 프로필';
   box.innerHTML = '';
-  getSoloList().forEach(p => {
+  profiles.forEach(p => {
+    const alias = escapeHtml(p.alias);
+    const age = escapeHtml(p.age);
+    const gender = escapeHtml(p.gender);
+    const job = escapeHtml(p.job);
+    const mbti = escapeHtml(p.mbti);
+    const side = escapeHtml(p.side);
+    const intro = escapeHtml(p.intro);
+    const tagline = escapeHtml(p.tagline);
+    const avatar = escapeHtml(p.avatar || 'SOLO');
     const c = document.createElement('div');
     c.className = 's-card';
     c.style.position = 'relative';
     c.innerHTML = `
       <div class="s-card-top">
         <span class="s-show-logo">나는 <b>SOLO</b></span>
-        <span class="s-brand">${p.side||''}<br>Official</span>
+        <span class="s-brand">${side}<br>Official</span>
       </div>
       <div class="s-card-body">
-        <div class="s-avatar">${p.avatar||(p.gender==='여성'?'👩':'👨')}</div>
-        <div class="s-tagline">${p.tagline||''} <span class="hl">${p.name}</span></div>
-        <div class="s-name">${p.name}</div>
-        <div class="s-info">${p.age}세 · ${p.gender} · ${p.job}</div>
-        ${p.mbti?`<div class="s-mbti">${p.mbti}</div>`:''}
-        <div class="s-intro">${p.intro}</div>
+        <div class="s-avatar">${avatar}</div>
+        <div class="s-tagline">${tagline} <span class="hl">${alias}</span></div>
+        <div class="s-name">${alias}</div>
+        <div class="s-info">${age}세 · ${gender} · ${job}</div>
+        ${mbti ? `<div class="s-mbti">${mbti}</div>` : ''}
+        <div class="s-intro">${intro}</div>
       </div>`;
     box.appendChild(c);
   });
 }
 renderSoloCards();
 
-function submitSolo() {
+const SOLO_SUBMISSION_ENDPOINT = '';
+
+function syncRadioLabels() {
+  document.querySelectorAll('.radio-label').forEach(label => {
+    const input = label.querySelector('input[type="radio"]');
+    const selected = Boolean(input && input.checked);
+    label.classList.toggle('is-selected', selected);
+  });
+}
+
+document.querySelectorAll('.radio-label input[type="radio"]').forEach(input => {
+  input.addEventListener('change', syncRadioLabels);
+});
+syncRadioLabels();
+
+async function sendSoloApplication(application) {
+  if (!SOLO_SUBMISSION_ENDPOINT) return { method: 'local' };
+
+  const response = await fetch(SOLO_SUBMISSION_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(application)
+  });
+  if (!response.ok) throw new Error(`SOLO submission failed: ${response.status}`);
+  return { method: 'endpoint' };
+}
+
+async function submitSolo() {
   const name    = document.getElementById('s-name').value.trim();
-  const age     = parseInt(document.getElementById('s-age').value);
+  const age     = Number(document.getElementById('s-age').value);
   const job     = document.getElementById('s-job').value.trim();
   const mbti    = document.getElementById('s-mbti').value.trim().toUpperCase();
   const intro   = document.getElementById('s-intro').value.trim();
@@ -935,37 +2202,57 @@ function submitSolo() {
   const gEl     = document.querySelector('input[name="s-gender"]:checked');
   const sEl     = document.querySelector('input[name="s-side"]:checked');
   if (!name||!age||!job||!intro||!gEl||!sEl) { alert('필수 항목을 모두 입력해주세요!'); return; }
-  if (age<20||age>55) { alert('나이를 다시 확인해주세요!'); return; }
-  const newP = { name, age, job, mbti, gender:gEl.value, side:sEl.value, intro, contact,
-    avatar: gEl.value==='여성'?'👩':'👨' };
-  const list = JSON.parse(localStorage.getItem('solo-list')||'[]');
-  list.push(newP); localStorage.setItem('solo-list', JSON.stringify(list));
+  if (!Number.isInteger(age)||age<20||age>55) { alert('나이를 다시 확인해주세요!'); return; }
+  const newP = {
+    id: window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : `solo-${Date.now()}`,
+    name, age, job, mbti, gender:gEl.value, side:sEl.value, intro, contact,
+    alias: createSoloAlias(getStoredSoloApplications().length),
+    tagline: '행복한 인연을 기다리는',
+    submittedAt: new Date().toISOString(),
+    source: 'wedding-invitation'
+  };
+
+  try {
+    await sendSoloApplication(newP);
+  } catch (error) {
+    console.error(error);
+    showModal('icon-message','신청을 완료하지 못했어요','잠시 후 다시 시도해주세요.');
+    return;
+  }
+
+  saveSoloApplication(newP);
   renderSoloCards();
-  ['s-name','s-age','s-job','s-mbti','s-intro','s-contact'].forEach(id => document.getElementById(id).value='');
-  document.querySelectorAll('input[name="s-gender"],input[name="s-side"]').forEach(r=>r.checked=false);
-  document.getElementById('solo-cards').scrollIntoView({behavior:'smooth',block:'nearest'});
-  showModal('❤','신청 완료!',`${name}님, 신청해 주셔서 감사해요!\n신랑·신부가 좋은 인연 꼭 연결해 드릴게요`);
+  document.getElementById('s-name').value = '';
+  document.getElementById('s-age').value = '';
+  document.getElementById('s-job').value = '';
+  document.getElementById('s-mbti').value = '';
+  document.getElementById('s-intro').value = '';
+  document.getElementById('s-contact').value = '';
+  document.querySelectorAll('input[name="s-gender"], input[name="s-side"]').forEach(input => { input.checked = false; });
+  syncRadioLabels();
+  showModal('icon-check','신청 완료','자기소개가 접수됐어요.\n결혼식장에서 좋은 분과 연결해드릴께요.');
 }
 document.getElementById('s-mbti').addEventListener('input', function(){ this.value=this.value.toUpperCase(); });
 
-/* ── 별 배경 ─────────────────────────────────────── */
-const starsEl = document.getElementById('stars-bg');
-for (let i=0;i<40;i++){
-  const s=document.createElement('div'); s.className='star-dot';
-  const sz=1+Math.random()*2.5;
-  s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation-delay:${Math.random()*4}s;animation-duration:${2+Math.random()*3}s;`;
-  starsEl.appendChild(s);
+/* ── 모달 ────────────────────────────────────────── */
+function iconMarkup(iconId, className = 'ui-icon') {
+  return `<svg class="${className}" aria-hidden="true" focusable="false"><use href="#${iconId}"></use></svg>`;
 }
 
-/* ── 모달 ────────────────────────────────────────── */
 function showModal(icon,title,body){
-  document.getElementById('modal-icon').textContent=icon;
+  document.getElementById('modal-icon').innerHTML=icon ? iconMarkup(icon, 'modal-ui-icon') : '';
   document.getElementById('modal-title').textContent=title;
   document.getElementById('modal-body').textContent=body;
   document.getElementById('modal').classList.add('show');
+  document.getElementById('modal').setAttribute('aria-hidden','false');
+  document.querySelector('.btn-modal-close').focus();
 }
-function closeModal(){ document.getElementById('modal').classList.remove('show'); }
+function closeModal(){
+  document.getElementById('modal').classList.remove('show');
+  document.getElementById('modal').setAttribute('aria-hidden','true');
+}
 document.getElementById('modal').addEventListener('click',function(e){ if(e.target===this)closeModal(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape')closeModal(); });
 </script>
 </body>
 </html>
