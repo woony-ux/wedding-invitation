@@ -1343,6 +1343,39 @@
       position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
       color: rgba(255,255,255,.85); font-size: 13px; letter-spacing: 3px; z-index: 2;
     }
+    /* ── 마음 전하실 곳 (계좌) ─────────────────────── */
+    .account-sec { text-align: center; }
+    .account-lead { font-size: 13px; color: var(--ink-m); line-height: 2; margin: 8px 0 30px; }
+    .account-groups { max-width: 400px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+    .acc-group { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; background: var(--white); }
+    .acc-toggle {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 17px 22px; background: none; border: none; cursor: pointer;
+      font-family: 'Noto Serif KR', serif; font-size: 15px; color: var(--ink);
+      letter-spacing: 1px; -webkit-tap-highlight-color: transparent;
+    }
+    .acc-arrow { font-size: 20px; color: var(--sky-deep); transition: transform .3s ease; line-height: 1; }
+    .acc-group.open .acc-arrow { transform: rotate(45deg); }
+    .acc-body { max-height: 0; overflow: hidden; transition: max-height .45s ease; }
+    .acc-group.open .acc-body { max-height: 520px; }
+    .acc-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 15px 22px; border-top: 1px solid var(--border); text-align: left;
+    }
+    .acc-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .acc-role {
+      align-self: flex-start; font-size: 10px; letter-spacing: 1px;
+      color: var(--sky-deep); background: var(--cream); padding: 2px 9px; border-radius: 999px;
+    }
+    .acc-name { font-size: 14px; color: var(--ink); font-weight: 500; }
+    .acc-bank { font-size: 12.5px; color: var(--ink-m); letter-spacing: .3px; }
+    .acc-copy {
+      flex-shrink: 0; padding: 9px 16px; border: 1px solid var(--sky); background: var(--white);
+      color: var(--sky-deep); border-radius: 999px; font-size: 12px; cursor: pointer;
+      transition: background .2s, color .2s, border-color .2s; -webkit-tap-highlight-color: transparent;
+    }
+    .acc-copy:active { background: var(--sky); color: #fff; }
+    .acc-copy.copied { background: var(--sky-deep); color: #fff; border-color: var(--sky-deep); }
   </style>
 </head>
 <body>
@@ -1802,6 +1835,64 @@
     <div class="t-row">
       <span class="t-label">Park</span>
       <span>건물 내 주차 · 예식 하객 무료</span>
+    </div>
+  </div>
+</section>
+
+<hr class="thin-line">
+<div class="section-rule" style="padding:20px 32px"><span>with heart</span></div>
+<hr class="thin-line">
+
+<!-- ════ 마음 전하실 곳 (계좌) ════ -->
+<section class="sec sec-cream account-sec" id="account">
+  <div class="sec-title reveal">마 음 전 하 실 곳</div>
+  <p class="account-lead reveal">참석이 어려우신 분들도 마음을 전하실 수 있도록<br>계좌번호를 안내드립니다.</p>
+  <div class="account-groups reveal">
+    <div class="acc-group">
+      <button class="acc-toggle" type="button" onclick="toggleAcc(this)">
+        <span>신랑측 계좌번호</span><span class="acc-arrow">＋</span>
+      </button>
+      <div class="acc-body">
+        <div class="acc-row">
+          <div class="acc-info">
+            <span class="acc-role">혼주</span>
+            <span class="acc-name">함상구</span>
+            <span class="acc-bank">국민은행 246-21-0264-767</span>
+          </div>
+          <button class="acc-copy" type="button" onclick="copyAcc(this,'246210264767')">복사</button>
+        </div>
+        <div class="acc-row">
+          <div class="acc-info">
+            <span class="acc-role">신랑</span>
+            <span class="acc-name">함정훈</span>
+            <span class="acc-bank">카카오뱅크 3333-03-8967900</span>
+          </div>
+          <button class="acc-copy" type="button" onclick="copyAcc(this,'3333038967900')">복사</button>
+        </div>
+      </div>
+    </div>
+    <div class="acc-group">
+      <button class="acc-toggle" type="button" onclick="toggleAcc(this)">
+        <span>신부측 계좌번호</span><span class="acc-arrow">＋</span>
+      </button>
+      <div class="acc-body">
+        <div class="acc-row">
+          <div class="acc-info">
+            <span class="acc-role">혼주</span>
+            <span class="acc-name">고현숙</span>
+            <span class="acc-bank">하나은행 238-910025-37908</span>
+          </div>
+          <button class="acc-copy" type="button" onclick="copyAcc(this,'23891002537908')">복사</button>
+        </div>
+        <div class="acc-row">
+          <div class="acc-info">
+            <span class="acc-role">신부</span>
+            <span class="acc-name">박운진</span>
+            <span class="acc-bank">토스뱅크 1000-0001-7880</span>
+          </div>
+          <button class="acc-copy" type="button" onclick="copyAcc(this,'1000000117880')">복사</button>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -2598,6 +2689,28 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape')closeModal(
     touchX = null;
   }, { passive: true });
 })();
+</script>
+
+<script>
+/* ── 계좌 아코디언 · 복사 ─────────────────────────── */
+function toggleAcc(btn){ btn.closest('.acc-group').classList.toggle('open'); }
+function copyAcc(btn, number){
+  const done = function(){
+    btn.textContent = '복사됨';
+    btn.classList.add('copied');
+    setTimeout(function(){ btn.textContent = '복사'; btn.classList.remove('copied'); }, 1500);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(number).then(done).catch(function(){ fallbackCopy(number, done); });
+  } else { fallbackCopy(number, done); }
+}
+function fallbackCopy(text, cb){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); } catch(e){}
+  document.body.removeChild(ta); cb();
+}
 </script>
 
 </body>
