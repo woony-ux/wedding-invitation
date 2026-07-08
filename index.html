@@ -1275,6 +1275,74 @@
     .btn-call:hover { border-color: rgba(255,255,255,.5); }
     .ft-hosts { font-size: 12px; color: rgba(255,255,255,.35); line-height: 2.4; font-weight: 300; }
     .ft-copy  { margin-top: 40px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 12px; color: rgba(255,255,255,.2); letter-spacing: 1px; }
+    /* ── 갤러리 ─────────────────────────────────────── */
+    .gallery-sec { padding: 54px 18px 60px; background-color: var(--white); }
+    .gallery-head { text-align: center; margin-bottom: 26px; }
+    .gallery-kicker {
+      font-family: 'Cormorant Garamond', serif; font-style: italic;
+      font-size: 15px; letter-spacing: 3px; color: var(--sky-deep); margin-bottom: 8px;
+    }
+    .gallery-title {
+      font-family: 'Noto Serif KR', serif; font-weight: 300;
+      font-size: 26px; letter-spacing: 8px; color: var(--ink); margin-bottom: 10px;
+    }
+    .gallery-copy { font-size: 12.5px; color: var(--ink-l); letter-spacing: 1px; }
+    .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .gallery-item {
+      position: relative; aspect-ratio: 3 / 4; overflow: hidden;
+      border-radius: 10px; cursor: pointer; background: var(--cream);
+      -webkit-tap-highlight-color: transparent;
+      box-shadow: 0 4px 14px rgba(18,49,79,.08);
+    }
+    .gallery-item img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+      transition: transform .7s cubic-bezier(.2,.7,.2,1);
+    }
+    .gallery-item::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(160deg, transparent 55%, rgba(46,119,194,.14));
+      opacity: 0; transition: opacity .4s ease;
+    }
+    .gallery-item:active img { transform: scale(.96); }
+    .gallery-item:active::after { opacity: 1; }
+    @media (hover: hover) {
+      .gallery-item:hover img { transform: scale(1.07); }
+      .gallery-item:hover::after { opacity: 1; }
+    }
+    /* 라이트박스 (탭하면 확대) */
+    .lightbox {
+      position: fixed; inset: 0; z-index: 4000;
+      background: rgba(8,22,40,.95);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; visibility: hidden;
+      transition: opacity .32s ease, visibility .32s ease;
+      -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+    }
+    .lightbox.open { opacity: 1; visibility: visible; }
+    .lightbox img {
+      max-width: 92%; max-height: 80%; object-fit: contain; border-radius: 8px;
+      box-shadow: 0 24px 70px rgba(0,0,0,.55);
+      transform: scale(.9); opacity: 0;
+      transition: transform .34s cubic-bezier(.2,.7,.2,1), opacity .34s ease;
+    }
+    .lightbox.open img { transform: scale(1); opacity: 1; }
+    .lb-btn {
+      position: absolute; background: rgba(255,255,255,.15); color: #fff;
+      border: none; border-radius: 999px; width: 46px; height: 46px;
+      font-size: 24px; line-height: 1; cursor: pointer; z-index: 2;
+      display: flex; align-items: center; justify-content: center;
+      -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+      transition: background .2s ease, transform .2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .lb-btn:active { background: rgba(255,255,255,.32); transform: scale(.92); }
+    .lb-close { top: 20px; right: 18px; }
+    .lb-prev { left: 12px; top: 50%; margin-top: -23px; }
+    .lb-next { right: 12px; top: 50%; margin-top: -23px; }
+    .lb-count {
+      position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+      color: rgba(255,255,255,.85); font-size: 13px; letter-spacing: 3px; z-index: 2;
+    }
   </style>
 </head>
 <body>
@@ -1454,6 +1522,56 @@
 </section>
 
 <hr class="thin-line">
+<div class="section-rule" style="padding:20px 32px"><span>gallery</span></div>
+<hr class="thin-line">
+
+<!-- ════ 갤러리 ════ -->
+<section class="sec gallery-sec" id="gallery">
+  <div class="gallery-head reveal">
+    <div class="gallery-kicker">Our Moments</div>
+    <div class="gallery-title">갤 러 리</div>
+    <p class="gallery-copy">사진을 누르면 크게 볼 수 있어요</p>
+  </div>
+  <div class="gallery-grid">
+    <div class="gallery-item reveal" onclick="openLightbox(0)"><img src="photos/w01.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 1"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(1)"><img src="photos/w02.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 2"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(2)"><img src="photos/w03.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 3"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(3)"><img src="photos/w04.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 4"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(4)"><img src="photos/w05.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 5"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(5)"><img src="photos/w06.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 6"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(6)"><img src="photos/w07.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 7"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(7)"><img src="photos/w08.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 8"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(8)"><img src="photos/w09.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 9"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(9)"><img src="photos/w10.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 10"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(10)"><img src="photos/w11.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 11"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(11)"><img src="photos/w12.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 12"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(12)"><img src="photos/w13.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 13"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(13)"><img src="photos/w14.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 14"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(14)"><img src="photos/w15.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 15"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(15)"><img src="photos/w16.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 16"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(16)"><img src="photos/w17.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 17"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(17)"><img src="photos/w18.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 18"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(18)"><img src="photos/w19.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 19"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(19)"><img src="photos/w20.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 20"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(20)"><img src="photos/w21.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 21"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(21)"><img src="photos/w22.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 22"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(22)"><img src="photos/w23.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 23"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(23)"><img src="photos/w24.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 24"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(24)"><img src="photos/w25.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 25"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(25)"><img src="photos/w26.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 26"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(26)"><img src="photos/w27.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 27"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(27)"><img src="photos/w28.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 28"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(28)"><img src="photos/w29.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 29"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(29)"><img src="photos/w30.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 30"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(30)"><img src="photos/w31.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 31"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(31)"><img src="photos/w32.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 32"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(32)"><img src="photos/w33.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 33"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(33)"><img src="photos/w34.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 34"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(34)"><img src="photos/w35.jpg" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 35"></div>
+  </div>
+</section>
+
+<hr class="thin-line">
 <div class="section-rule" style="padding:20px 32px"><span>ceremony</span></div>
 <hr class="thin-line">
 
@@ -1524,26 +1642,26 @@
     <div class="prize-card">
       <div class="prize-rank">1st</div>
       <div>
-        <div class="prize-name">AirPods Max</div>
-        <div class="prize-note">가장 큰 행운의 주인공에게</div>
+        <div class="prize-name">클라세아줄 데킬라</div>
+        <div class="prize-note">30만원 상당 프리미엄 데킬라</div>
       </div>
       <div class="prize-count">1명</div>
     </div>
     <div class="prize-card">
       <div class="prize-rank">2nd</div>
       <div>
-        <div class="prize-name">AirPods Pro</div>
-        <div class="prize-note">파티를 더 오래 기억할 선물</div>
+        <div class="prize-name">네스프레소 커피머신</div>
+        <div class="prize-note">매일 아침 저희를 기억해 주세요</div>
       </div>
       <div class="prize-count">1명</div>
     </div>
     <div class="prize-card">
-      <div class="prize-rank">More</div>
+      <div class="prize-rank">3rd</div>
       <div>
-        <div class="prize-name">Surprise Gift</div>
-        <div class="prize-note">현장에서 공개되는 추가 경품</div>
+        <div class="prize-name">웰컴 굿즈 세트</div>
+        <div class="prize-note">스티커 · 티셔츠 · 맥세이프 그립톡</div>
       </div>
-      <div class="prize-count">추가</div>
+      <div class="prize-count">다수</div>
     </div>
   </div>
 
@@ -2425,5 +2543,62 @@ function closeModal(){
 document.getElementById('modal').addEventListener('click',function(e){ if(e.target===this)closeModal(); });
 document.addEventListener('keydown',function(e){ if(e.key==='Escape')closeModal(); });
 </script>
+<!-- ════ 갤러리 라이트박스 ════ -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-hidden="true" onclick="if(event.target===this)closeLightbox()">
+  <button class="lb-btn lb-close" type="button" aria-label="닫기" onclick="closeLightbox()">&times;</button>
+  <button class="lb-btn lb-prev" type="button" aria-label="이전 사진" onclick="lbStep(-1)">&#8249;</button>
+  <img id="lb-img" src="" alt="웨딩 사진 크게 보기">
+  <button class="lb-btn lb-next" type="button" aria-label="다음 사진" onclick="lbStep(1)">&#8250;</button>
+  <div class="lb-count"><span id="lb-cur">1</span> / <span id="lb-total">35</span></div>
+</div>
+
+<script>
+(function () {
+  const lb      = document.getElementById('lightbox');
+  const lbImg   = document.getElementById('lb-img');
+  const lbCur   = document.getElementById('lb-cur');
+  const photos  = Array.from(document.querySelectorAll('.gallery-grid img')).map(im => im.getAttribute('src'));
+  let idx = 0;
+
+  document.getElementById('lb-total').textContent = photos.length;
+
+  function show(i) {
+    idx = (i + photos.length) % photos.length;
+    lbImg.src = photos[idx];
+    lbCur.textContent = idx + 1;
+  }
+  window.openLightbox = function (i) {
+    show(i);
+    lb.classList.add('open');
+    lb.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  };
+  window.closeLightbox = function () {
+    lb.classList.remove('open');
+    lb.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  };
+  window.lbStep = function (d) { show(idx + d); };
+
+  // 키보드 (데스크톱)
+  document.addEventListener('keydown', function (e) {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape') closeLightbox();
+    else if (e.key === 'ArrowLeft') lbStep(-1);
+    else if (e.key === 'ArrowRight') lbStep(1);
+  });
+
+  // 스와이프 (모바일)
+  let touchX = null;
+  lb.addEventListener('touchstart', function (e) { touchX = e.changedTouches[0].clientX; }, { passive: true });
+  lb.addEventListener('touchend', function (e) {
+    if (touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 45) lbStep(dx < 0 ? 1 : -1);
+    touchX = null;
+  }, { passive: true });
+})();
+</script>
+
 </body>
 </html>
