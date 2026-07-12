@@ -1726,7 +1726,7 @@
 
   <div class="ticket-card reveal" id="ticket-card">
     <div class="ticket-label">MY LUCKY NUMBER</div>
-    <div class="ticket-machine" id="ticket-number" aria-live="polite" aria-label="럭키드로우 추첨권 번호">
+        <div class="ticket-machine" id="ticket-number" aria-live="off" aria-label="럭키드로우 추첨권 번호 발급 전">
       <span class="ticket-prefix">WJ</span>
       <span class="ticket-separator">-</span>
       <span class="ticket-reel"><span class="ticket-reel-digit">0</span></span>
@@ -2039,7 +2039,7 @@
   </div>
   <div class="credit-row reveal">
     <div class="credit-role">DATE</div>
-    <div class="credit-name">2026 · 08 · 09 <small>토요일 오후 2시 30분</small></div>
+    <div class="credit-name">2026 · 08 · 09 <small>일요일 오후 2시 30분</small></div>
   </div>
   <div class="credit-row reveal">
     <div class="credit-role">LOCATION</div>
@@ -2074,19 +2074,33 @@ const WEDDING_API_ENDPOINT = window.location.hostname.endsWith('.vercel.app')
   ? '/api/wedding'
   : 'https://wedding-invitation-five-eta.vercel.app/api/wedding';
 
-async function postWeddingApi(action, payload) {
-  const response = await fetch(WEDDING_API_ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action, ...payload })
-  });
-  const data = await response.json().catch(() => null);
-  if (!response.ok || !data || !data.ok) {
-    const error = new Error(data && data.error ? data.error : `request_failed_${response.status}`);
-    error.response = data;
-    throw error;
+let luckyTicketRequestTimeoutMs = 10000;
+
+async function postWeddingApi(action, payload, options = {}) {
+  const controller = options.timeoutMs && 'AbortController' in window
+    ? new AbortController()
+    : null;
+  const timeout = controller
+    ? setTimeout(() => controller.abort(), options.timeoutMs)
+    : null;
+  try {
+    const response = await fetch(WEDDING_API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, ...payload }),
+      ...(controller ? { signal: controller.signal } : {})
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data || !data.ok) {
+      const error = new Error(data && data.error ? data.error : `request_failed_${response.status}`);
+      error.response = data;
+      error.status = response.status;
+      throw error;
+    }
+    return data;
+  } finally {
+    if (timeout) clearTimeout(timeout);
   }
-  return data;
 }
 
 /* ── 스크롤 리빌 ─────────────────────────────────── */
@@ -2169,22 +2183,63 @@ tick(); setInterval(tick, 1000);
 const LUCKY_TICKET_KEY = 'wedding-lucky-ticket';
 const LUCKY_DEVICE_KEY = 'wedding-lucky-device';
 const LUCKY_TICKET_ENDPOINT = WEDDING_API_ENDPOINT;
-const LUCKY_TICKET_OPEN = new Date('2026-08-09T00:00:00+09:00');
-const LUCKY_TICKET_CLOSE = new Date('2026-08-10T00:00:00+09:00');
 let luckySpinTimer = null;
 let luckySpinStep = 0;
 let luckyTicketIssuing = false;
+let luckyTicketQueued = false;
 let luckyTicketVisible = false;
 let luckyTicketObserver = null;
+const luckyMemoryStorage = new Map();
 
-function createLuckyTicketNumber() {
-  const array = new Uint32Array(1);
-  if (window.crypto && window.crypto.getRandomValues) {
-    window.crypto.getRandomValues(array);
-  } else {
-    array[0] = Math.floor(Math.random() * 100000);
+function getLuckyCookie(name) {
+  try {
+    const prefix = `${encodeURIComponent(name)}=`;
+    const cookie = document.cookie.split('; ').find(item => item.startsWith(prefix));
+    return cookie ? decodeURIComponent(cookie.slice(prefix.length)) : null;
+  } catch {
+    return null;
   }
-  return `WJ-${String(array[0] % 10000).padStart(4, '0')}`;
+}
+
+function setLuckyCookie(name, value) {
+  try {
+    const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; Max-Age=31536000; Path=/; SameSite=Lax${secure}`;
+  } catch {}
+}
+
+function removeLuckyCookie(name) {
+  try {
+    document.cookie = `${encodeURIComponent(name)}=; Max-Age=0; Path=/; SameSite=Lax`;
+  } catch {}
+}
+
+function readLuckyStorage(key) {
+  try {
+    const value = localStorage.getItem(key);
+    if (value !== null) {
+      luckyMemoryStorage.set(key, value);
+      return value;
+    }
+  } catch {}
+  const cookieValue = getLuckyCookie(key);
+  if (cookieValue !== null) {
+    luckyMemoryStorage.set(key, cookieValue);
+    return cookieValue;
+  }
+  return luckyMemoryStorage.get(key) || null;
+}
+
+function writeLuckyStorage(key, value) {
+  luckyMemoryStorage.set(key, value);
+  try { localStorage.setItem(key, value); } catch {}
+  setLuckyCookie(key, value);
+}
+
+function removeLuckyStorage(key) {
+  luckyMemoryStorage.delete(key);
+  try { localStorage.removeItem(key); } catch {}
+  removeLuckyCookie(key);
 }
 
 function createLuckyTicketPreviewNumber() {
@@ -2215,7 +2270,7 @@ function paintLuckyReel(reelEl, digit) {
   if (nextEl) nextEl.textContent = String((safeDigit + 1) % 10);
 }
 
-function setLuckyTicketDisplay(number, spinning = false) {
+function setLuckyTicketDisplay(number, spinning = false, confirmed = false) {
   const machineEl = document.getElementById('ticket-number');
   if (!machineEl) return;
   hydrateLuckyReels();
@@ -2230,20 +2285,19 @@ function setLuckyTicketDisplay(number, spinning = false) {
     }
   });
   luckySpinStep += 1;
-  machineEl.setAttribute('aria-label', `럭키드로우 추첨권 번호 WJ-${digits}`);
-}
-
-function isLuckyTicketOpen(now = new Date()) {
-  return now >= LUCKY_TICKET_OPEN && now < LUCKY_TICKET_CLOSE;
+  machineEl.setAttribute('aria-live', confirmed ? 'polite' : 'off');
+  machineEl.setAttribute('aria-label', confirmed
+    ? `럭키드로우 추첨권 번호 WJ-${digits}`
+    : '럭키드로우 추첨권 번호 발급 전');
 }
 
 function getLuckyDeviceId() {
-  let deviceId = localStorage.getItem(LUCKY_DEVICE_KEY);
+  let deviceId = readLuckyStorage(LUCKY_DEVICE_KEY);
   if (!deviceId) {
     deviceId = window.crypto && window.crypto.randomUUID
       ? window.crypto.randomUUID()
       : `device-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    localStorage.setItem(LUCKY_DEVICE_KEY, deviceId);
+    writeLuckyStorage(LUCKY_DEVICE_KEY, deviceId);
   }
   return deviceId;
 }
@@ -2251,20 +2305,44 @@ function getLuckyDeviceId() {
 async function requestLuckyTicketFromEndpoint() {
   if (!LUCKY_TICKET_ENDPOINT) throw new Error('missing_ticket_endpoint');
 
-  const data = await postWeddingApi('issue_lucky_ticket', {
+  const payload = {
     deviceId: getLuckyDeviceId(),
     source: 'wedding-invitation',
     userAgent: navigator.userAgent,
     requestedAt: new Date().toISOString()
-  });
-  if (!data || !/^WJ-\d{4}$/.test(data.number || '')) {
+  };
+  let data;
+  let lastError;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      data = await postWeddingApi('issue_lucky_ticket', payload, {
+        timeoutMs: luckyTicketRequestTimeoutMs
+      });
+      break;
+    } catch (error) {
+      lastError = error;
+      const retryable = error.name === 'AbortError'
+        || error.message === 'ticket_busy'
+        || !error.status
+        || error.status >= 500;
+      const retryAfter = Number(error.response && error.response.retryAfterSeconds);
+      if (!retryable || attempt > 0 || retryAfter > 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+  }
+  if (!data) throw lastError || new Error('request_failed');
+
+  const issuedAt = new Date(data.issuedAt);
+  if (!/^WJ-\d{4}$/.test(data.number || '')
+      || !/^\d+$/.test(String(data.ticketId || ''))
+      || Number.isNaN(issuedAt.getTime())) {
     throw new Error('Lucky ticket endpoint returned an invalid number');
   }
 
   return {
     number: data.number,
-    issuedAt: data.issuedAt || new Date().toISOString(),
-    ticketId: data.ticketId || null,
+    issuedAt: issuedAt.toISOString(),
+    ticketId: String(data.ticketId),
     source: 'endpoint'
   };
 }
@@ -2286,11 +2364,12 @@ function startLuckyTicketSpinner() {
   }
   stopLuckyTicketSpinner();
   numberEl.classList.add('is-spinning');
-  setLuckyTicketDisplay(createLuckyTicketPreviewNumber(), true);
   if (prefersReducedMotion) {
+    setLuckyTicketDisplay('WJ-0000');
     numberEl.classList.remove('is-spinning');
     return;
   }
+  setLuckyTicketDisplay(createLuckyTicketPreviewNumber(), true);
   luckySpinTimer = setInterval(() => {
     setLuckyTicketDisplay(createLuckyTicketPreviewNumber(), true);
   }, 120);
@@ -2329,13 +2408,13 @@ function renderLuckyTicket(ticket) {
   if (!ticket) {
     helpEl.textContent = '추첨권 번호는 2026년 8월 9일 예식 당일에만 받을 수 있습니다.';
     if (buttonLabel) buttonLabel.textContent = '8월 9일에 번호 받기';
-    setLuckyTicketDisplay(createLuckyTicketPreviewNumber());
+    setLuckyTicketDisplay('WJ-0000');
     syncLuckyTicketSpinner();
     return;
   }
   stopLuckyTicketSpinner();
   numberEl.classList.remove('is-spinning');
-  setLuckyTicketDisplay(ticket.number);
+  setLuckyTicketDisplay(ticket.number, false, true);
   helpEl.textContent = '추첨권이 준비됐습니다. 예식 당일 이 화면을 보여주세요.';
   if (buttonLabel) buttonLabel.textContent = '내 추첨권 다시 보기';
 }
@@ -2355,40 +2434,46 @@ function setLuckyTicketPending(isPending) {
 
 function getLuckyTicket() {
   try {
-    if (new Date() < LUCKY_TICKET_OPEN) {
-      localStorage.removeItem(LUCKY_TICKET_KEY);
-      return null;
-    }
-    const ticket = JSON.parse(localStorage.getItem(LUCKY_TICKET_KEY) || 'null');
+    const ticket = JSON.parse(readLuckyStorage(LUCKY_TICKET_KEY) || 'null');
     if (!ticket) return null;
-    if (!/^WJ-\d{4}$/.test(ticket.number || '')) {
-      localStorage.removeItem(LUCKY_TICKET_KEY);
+    if (!/^WJ-\d{4}$/.test(ticket.number || '') || !/^\d+$/.test(String(ticket.ticketId || ''))) {
+      removeLuckyStorage(LUCKY_TICKET_KEY);
       return null;
     }
     const issuedAt = ticket.issuedAt ? new Date(ticket.issuedAt) : null;
-    if (!isLuckyTicketOpen() && (!issuedAt || issuedAt < LUCKY_TICKET_OPEN)) {
-      localStorage.removeItem(LUCKY_TICKET_KEY);
+    if (!issuedAt || Number.isNaN(issuedAt.getTime())) {
+      removeLuckyStorage(LUCKY_TICKET_KEY);
       return null;
     }
     return ticket;
   } catch {
-    localStorage.removeItem(LUCKY_TICKET_KEY);
+    removeLuckyStorage(LUCKY_TICKET_KEY);
     return null;
   }
 }
 
 async function issueLuckyTicket() {
+  if (luckyTicketIssuing || luckyTicketQueued) return;
+
+  const issue = () => performLuckyTicketIssue();
+  luckyTicketQueued = true;
+  try {
+    if (navigator.locks && typeof navigator.locks.request === 'function') {
+      return await navigator.locks.request('wedding-lucky-ticket-issue', { mode: 'exclusive' }, issue);
+    }
+    return await issue();
+  } finally {
+    luckyTicketQueued = false;
+  }
+}
+
+async function performLuckyTicketIssue() {
   if (luckyTicketIssuing) return;
 
   const savedTicket = getLuckyTicket();
   if (savedTicket) {
     renderLuckyTicket(savedTicket);
-    showModal('icon-ticket','이미 발급된 번호입니다',`${savedTicket.number}\n한 기기에서는 하나의 추첨권 번호만 유지됩니다.`);
-    return;
-  }
-
-  if (!isLuckyTicketOpen()) {
-    showModal('icon-ticket','8월 9일 당일에 추첨권을 받을 수 있어요','예식장에서 다시 눌러주세요.');
+    showModal('icon-ticket','이미 발급된 번호입니다',`${savedTicket.number}\n이 브라우저에서는 하나의 추첨권 번호만 유지됩니다.`);
     return;
   }
 
@@ -2397,10 +2482,12 @@ async function issueLuckyTicket() {
     setLuckyTicketPending(true);
     ticket = await requestLuckyTicketFromEndpoint();
   } catch (error) {
-    console.error(error);
     if (error.message === 'ticket_not_open') {
       showModal('icon-ticket','8월 9일 당일에 추첨권을 받을 수 있어요','예식장에서 다시 눌러주세요.');
+    } else if (error.message === 'ticket_busy' || error.name === 'AbortError') {
+      showModal('icon-ticket','접속이 몰리고 있어요','같은 번호가 유지되니 잠시 후 다시 눌러주세요.');
     } else {
+      console.error(error);
       showModal('icon-ticket','발급을 다시 시도해주세요','추첨권 번호 발급 서버에 연결하지 못했습니다.\n잠시 후 다시 눌러주세요.');
     }
     return;
@@ -2408,13 +2495,18 @@ async function issueLuckyTicket() {
     setLuckyTicketPending(false);
   }
 
-  localStorage.setItem(LUCKY_TICKET_KEY, JSON.stringify(ticket));
+  writeLuckyStorage(LUCKY_TICKET_KEY, JSON.stringify(ticket));
   renderLuckyTicket(ticket);
   showModal('icon-gift','추첨권 발급 완료',`${ticket.number}\n예식 당일 현장에서 이 화면을 보여주세요.`);
 }
 
+getLuckyDeviceId();
 renderLuckyTicket(getLuckyTicket());
 initLuckyTicketVisibility();
+window.addEventListener('storage', event => {
+  if (event.key !== LUCKY_TICKET_KEY && event.key !== LUCKY_DEVICE_KEY) return;
+  renderLuckyTicket(getLuckyTicket());
+});
 
 /* ── 나는 솔로 ───────────────────────────────────── */
 const SOLO_APPLICATIONS_KEY = 'wedding-solo-applications';

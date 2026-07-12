@@ -5,8 +5,16 @@ const GITHUB_TOKEN = process.env.GITHUB_DATA_TOKEN;
 const LUCKY_TICKET_OPEN = new Date('2026-08-09T00:00:00+09:00');
 const LUCKY_TICKET_CLOSE = new Date('2026-08-10T00:00:00+09:00');
 const MAX_BODY_BYTES = 16 * 1024;
+const GITHUB_REQUEST_TIMEOUT_MS = Math.max(
+  process.env.NODE_ENV === 'test' ? 10 : 1000,
+  Number(process.env.GITHUB_REQUEST_TIMEOUT_MS) || 8000
+);
+const pendingLuckyTickets = new Map();
+const recentLuckyTickets = new Map();
+const RECENT_TICKET_TTL_MS = 5 * 60 * 1000;
 
 const ALLOWED_ORIGINS = new Set([
+  'https://junghoon-woonjin.kr',
   'https://woony-ux.github.io',
   'https://wedding-invitation-five-eta.vercel.app',
   'http://127.0.0.1:8765',
@@ -21,7 +29,7 @@ async function handler(req, res) {
     return;
   }
 
-  if (req.method !== 'POST') {
+  if (req.method !== 'GET' && req.method !== 'POST') {
     sendJson(res, 405, { ok: false, error: 'method_not_allowed' });
     return;
   }
@@ -33,6 +41,21 @@ async function handler(req, res) {
 
   try {
     assertConfigured();
+    if (req.method === 'GET') {
+      sendJson(res, 200, {
+        ok: true,
+        service: 'wedding-invitation-api',
+        status: 'configured',
+        storageConfigured: true,
+        storage: 'github-contents',
+        luckyTicketWindow: {
+          openAt: LUCKY_TICKET_OPEN.toISOString(),
+          closeAt: LUCKY_TICKET_CLOSE.toISOString()
+        }
+      });
+      return;
+    }
+
     const payload = parsePayload(req);
     const action = sanitize(payload.action || inferAction(payload), 40);
 
@@ -43,16 +66,18 @@ async function handler(req, res) {
 
     if (action === 'issue_lucky_ticket') {
       const result = await issueLuckyTicket(payload);
-      sendJson(res, result.ok ? 200 : 409, result);
+      sendJson(res, result.ok ? 200 : (result.status || 409), result);
       return;
     }
 
     sendJson(res, 400, { ok: false, error: 'unsupported_action' });
   } catch (error) {
-    const status = error.expose ? 400 : 500;
+    const status = error.publicStatus || (error.expose ? 400 : 500);
+    const exposeMessage = Boolean(error.publicStatus || error.expose);
     sendJson(res, status, {
       ok: false,
-      error: error.expose ? error.message : 'server_error'
+      error: exposeMessage ? error.message : 'server_error',
+      ...(error.retryAfterSeconds ? { retryAfterSeconds: error.retryAfterSeconds } : {})
     });
   }
 }
@@ -65,14 +90,18 @@ module.exports.config = {
     }
   }
 };
+module.exports._test = {
+  isWithinLuckyTicketWindow,
+  issueLuckyTicket
+};
 
 function setCors(req, res) {
   const origin = req.headers.origin || '';
+  res.setHeader('Vary', 'Origin');
   if (ALLOWED_ORIGINS.has(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Vary', 'Origin');
   }
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Max-Age', '86400');
 }
@@ -92,6 +121,7 @@ function isAllowedRequest(req) {
 
 function sendJson(res, status, value) {
   res.status(status).setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-store');
   res.end(JSON.stringify(value));
 }
 
@@ -167,10 +197,11 @@ async function submitSoloApplication(payload) {
   };
 }
 
-async function issueLuckyTicket(payload) {
-  if (!isLuckyTicketOpen(new Date())) {
+async function issueLuckyTicket(payload, now = new Date()) {
+  if (!isLuckyTicketOpen(now)) {
     return {
       ok: false,
+      status: 200,
       error: 'ticket_not_open',
       openAt: LUCKY_TICKET_OPEN.toISOString(),
       closeAt: LUCKY_TICKET_CLOSE.toISOString()
@@ -183,108 +214,106 @@ async function issueLuckyTicket(payload) {
   }
 
   const deviceHash = sha256(deviceId);
-  const ticketPath = `tickets/by-device/${deviceHash}.json`;
-  const existing = await getTicketFile(ticketPath) || await findTicketIssue(deviceHash);
-  if (existing) {
-    return {
-      ok: true,
-      duplicate: true,
-      number: existing.number,
-      ticketId: String(existing.ticketId || existing.issueNumber)
-    };
+  const cached = getRecentLuckyTicket(deviceHash);
+  if (cached) return { ...cached, duplicate: true };
+  if (pendingLuckyTickets.has(deviceHash)) {
+    const ticket = await pendingLuckyTickets.get(deviceHash);
+    return { ...ticket, duplicate: true };
   }
 
-  const issuedAt = new Date().toISOString();
-  const source = sanitize(payload.source || 'wedding-invitation', 40);
-  const userAgent = sanitize(payload.userAgent, 240);
-  const created = await github('/issues', {
-    method: 'POST',
-    body: {
-      title: '추첨권 발급 대기',
-      labels: ['lucky-ticket'],
-      body: buildTicketBody({
-        ticketNumber: 'pending',
-        deviceHash,
-        issuedAt,
-        source,
-        userAgent
-      })
-    }
-  });
-
-  if (created.number > 9999) {
-    throw new Error('ticket_sold_out');
-  }
-
-  const ticketNumber = `WJ-${String(created.number).padStart(4, '0')}`;
-  const ticket = {
-    number: ticketNumber,
-    ticketId: String(created.number),
-    deviceHash,
-    issuedAt,
-    source,
-    userAgent
-  };
-
-  await github(`/issues/${created.number}`, {
-    method: 'PATCH',
-    body: {
-      title: `추첨권 ${ticketNumber}`,
-      body: buildTicketBody({
-        ticketNumber,
-        deviceHash,
-        issuedAt,
-        source,
-        userAgent
-      })
-    }
-  });
-
+  const request = issueLuckyTicketForDevice(payload, deviceHash, now);
+  pendingLuckyTickets.set(deviceHash, request);
   try {
-    await putRepoFile(ticketPath, {
-      message: `Add lucky ticket ${ticketNumber}`,
-      content: toBase64(JSON.stringify(ticket, null, 2))
-    });
-  } catch (error) {
-    if (error.status === 422) {
-      const duplicated = await getTicketFile(ticketPath);
-      if (duplicated) {
-        await github(`/issues/${created.number}`, {
-          method: 'PATCH',
-          body: {
-            title: `중복 추첨권 요청 ${ticketNumber}`,
-            state: 'closed',
-            body: [
-              buildTicketBody({
-                ticketNumber,
-                deviceHash,
-                issuedAt,
-                source,
-                userAgent
-              }),
-              '',
-              `duplicate_of: ${duplicated.number}`
-            ].join('\n')
-          }
-        });
-        return {
-          ok: true,
-          duplicate: true,
-          number: duplicated.number,
-          ticketId: duplicated.ticketId
-        };
+    const ticket = await request;
+    setRecentLuckyTicket(deviceHash, ticket);
+    return ticket;
+  } finally {
+    if (pendingLuckyTickets.get(deviceHash) === request) pendingLuckyTickets.delete(deviceHash);
+  }
+}
+
+function getRecentLuckyTicket(deviceHash) {
+  const cached = recentLuckyTickets.get(deviceHash);
+  if (!cached) return null;
+  if (Date.now() - cached.cachedAt >= RECENT_TICKET_TTL_MS) {
+    recentLuckyTickets.delete(deviceHash);
+    return null;
+  }
+  return cached.ticket;
+}
+
+function setRecentLuckyTicket(deviceHash, ticket) {
+  if (recentLuckyTickets.size >= 1000) {
+    recentLuckyTickets.delete(recentLuckyTickets.keys().next().value);
+  }
+  recentLuckyTickets.set(deviceHash, { cachedAt: Date.now(), ticket });
+}
+
+async function issueLuckyTicketForDevice(payload, deviceHash, now) {
+  try {
+    const issuedAt = now.toISOString();
+    const source = sanitize(payload.source || 'wedding-invitation', 40);
+    const userAgent = sanitize(payload.userAgent, 240);
+    for (let probe = 0; probe < 9999; probe += 1) {
+      const number = candidateTicketNumber(deviceHash, probe);
+      const ticketPath = `tickets/by-number/${number}.json`;
+      const indexed = await getTicketFile(ticketPath);
+      if (indexed) {
+        if (indexed.deviceHash === deviceHash) {
+          return { ...indexed, ok: true, duplicate: true };
+        }
+        continue;
       }
+
+      const ticket = {
+        ok: true,
+        duplicate: false,
+        number,
+        ticketId: number.slice(3),
+        deviceHash,
+        source,
+        userAgent,
+        issuedAt
+      };
+      const result = await claimTicketPath(ticketPath, ticket);
+      if (result.status === 'collision') continue;
+      return {
+        ...result.ticket,
+        ok: true,
+        duplicate: result.status === 'duplicate'
+      };
+    }
+    throw publicServiceError('ticket_sold_out', 503);
+  } catch (error) {
+    if (isTemporaryGitHubError(error)) {
+      throw publicServiceError('ticket_busy', 503, error.retryAfterSeconds);
     }
     throw error;
   }
+}
 
-  return {
-    ok: true,
-    duplicate: false,
-    number: ticket.number,
-    ticketId: ticket.ticketId,
-    issuedAt
-  };
+async function claimTicketPath(path, ticket) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      await putRepoFile(path, {
+        message: `Add lucky ticket ${ticket.number}`,
+        content: toBase64(JSON.stringify(ticket, null, 2))
+      });
+      return { status: 'claimed', ticket };
+    } catch (error) {
+      const existing = await getTicketFile(path);
+      if (existing) {
+        return existing.deviceHash === ticket.deviceHash
+          ? { status: 'duplicate', ticket: existing }
+          : { status: 'collision', ticket: existing };
+      }
+      if (error.status === 403 || error.status === 429 || error.retryAfterSeconds) throw error;
+      if (!isTemporaryGitHubError(error) && error.status !== 422) throw error;
+      if (attempt === 2) throw error;
+      await new Promise(resolve => setTimeout(resolve, 80 * (attempt + 1)));
+    }
+  }
+  throw new Error('ticket_index_failed');
 }
 
 function validateApplication(payload) {
@@ -330,53 +359,27 @@ function validateApplication(payload) {
   };
 }
 
-async function findTicketIssue(deviceHash) {
-  for (let page = 1; page <= 100; page += 1) {
-    const issues = await github(`/issues?state=all&labels=lucky-ticket&per_page=100&page=${page}`);
-    if (!issues.length) return null;
-
-    const found = issues.find(issue => String(issue.body || '').includes(`device_hash: ${deviceHash}`));
-    if (found) {
-      return {
-        issueNumber: found.number,
-        ticketId: String(found.number),
-        number: extractTicketNumber(found) || `WJ-${String(found.number).padStart(4, '0')}`
-      };
-    }
-  }
-  return null;
-}
-
 async function getTicketFile(path) {
   const file = await getRepoFile(path);
   if (!file || !file.content) return null;
 
   try {
     const ticket = JSON.parse(fromBase64(file.content));
-    if (ticket && /^WJ-\d{4}$/.test(ticket.number || '') && ticket.ticketId) {
+    if (ticket
+        && /^WJ-\d{4}$/.test(ticket.number || '')
+        && /^\d+$/.test(String(ticket.ticketId || ''))
+        && /^[a-f0-9]{64}$/.test(ticket.deviceHash || '')
+        && ticket.issuedAt) {
       return ticket;
     }
-  } catch {
-    return null;
-  }
+  } catch {}
   return null;
 }
 
-function extractTicketNumber(issue) {
-  const titleMatch = String(issue.title || '').match(/WJ-\d{4}/);
-  if (titleMatch) return titleMatch[0];
-  const bodyMatch = String(issue.body || '').match(/ticket_number: (WJ-\d{4})/);
-  return bodyMatch ? bodyMatch[1] : null;
-}
-
-function buildTicketBody({ ticketNumber, deviceHash, issuedAt, source, userAgent }) {
-  return [
-    `ticket_number: ${ticketNumber}`,
-    `device_hash: ${deviceHash}`,
-    `issued_at: ${issuedAt}`,
-    `source: ${source}`,
-    `user_agent: ${userAgent}`
-  ].join('\n');
+function candidateTicketNumber(deviceHash, probe) {
+  const base = Number.parseInt(deviceHash.slice(0, 8), 16) % 9999;
+  const value = ((base + probe) % 9999) + 1;
+  return `WJ-${String(value).padStart(4, '0')}`;
 }
 
 async function getRepoFile(path) {
@@ -396,32 +399,72 @@ async function putRepoFile(path, body) {
 }
 
 async function github(path, options = {}) {
-  const response = await fetch(`https://api.github.com/repos/${DATA_REPO}${path}`, {
-    method: options.method || 'GET',
-    headers: {
-      'Accept': 'application/vnd.github+json',
-      'Authorization': `Bearer ${GITHUB_TOKEN}`,
-      'Content-Type': 'application/json',
-      'X-GitHub-Api-Version': '2022-11-28',
-      'User-Agent': 'wedding-invitation-api'
-    },
-    body: options.body ? JSON.stringify(options.body) : undefined
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), GITHUB_REQUEST_TIMEOUT_MS);
+  try {
+    const response = await fetch(`https://api.github.com/repos/${DATA_REPO}${path}`, {
+      method: options.method || 'GET',
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': `Bearer ${GITHUB_TOKEN}`,
+        'Content-Type': 'application/json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'User-Agent': 'wedding-invitation-api'
+      },
+      body: options.body ? JSON.stringify(options.body) : undefined,
+      signal: controller.signal
+    });
 
-  if (!response.ok) {
-    const text = await response.text();
-    const error = new Error(`github_${response.status}`);
-    error.status = response.status;
-    error.detail = text.slice(0, 500);
+    if (!response.ok) {
+      const text = await response.text();
+      const error = new Error(`github_${response.status}`);
+      error.status = response.status;
+      error.temporary = response.status === 409 || response.status === 429 || response.status >= 500;
+      const retryAfter = Number(response.headers.get('retry-after'));
+      if (Number.isFinite(retryAfter) && retryAfter > 0) error.retryAfterSeconds = retryAfter;
+      error.detail = text.slice(0, 500);
+      throw error;
+    }
+
+    if (response.status === 204) return null;
+    try {
+      return await response.json();
+    } catch (cause) {
+      const error = new Error('github_response_error');
+      error.status = 503;
+      error.temporary = true;
+      error.cause = cause;
+      throw error;
+    }
+  } catch (cause) {
+    if (cause && cause.status) throw cause;
+    const error = new Error(cause && cause.name === 'AbortError' ? 'github_timeout' : 'github_network_error');
+    error.status = 503;
+    error.temporary = true;
     throw error;
+  } finally {
+    clearTimeout(timeout);
   }
-
-  return response.status === 204 ? null : response.json();
 }
 
 function isLuckyTicketOpen(now) {
   if (process.env.LUCKY_TICKET_FORCE_OPEN === 'true') return true;
+  return isWithinLuckyTicketWindow(now);
+}
+
+function isWithinLuckyTicketWindow(now) {
   return now >= LUCKY_TICKET_OPEN && now < LUCKY_TICKET_CLOSE;
+}
+
+function isTemporaryGitHubError(error) {
+  return Boolean(error && (
+    error.temporary
+    || error.status === 403
+    || error.status === 409
+    || error.status === 422
+    || error.status === 429
+    || error.status >= 500
+  ));
 }
 
 function sanitize(value, maxLength) {
@@ -451,6 +494,13 @@ function encodeURIComponentPath(path) {
 function publicError(message) {
   const error = new Error(message);
   error.expose = true;
+  return error;
+}
+
+function publicServiceError(message, status, retryAfterSeconds) {
+  const error = new Error(message);
+  error.publicStatus = status;
+  if (retryAfterSeconds) error.retryAfterSeconds = retryAfterSeconds;
   return error;
 }
 
