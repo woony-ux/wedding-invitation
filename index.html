@@ -8,7 +8,7 @@
   <meta http-equiv="Expires" content="0">
   <title>함정훈 · 박운진</title>
   <meta name="description" content="함정훈, 박운진의 2026년 8월 9일 모바일 청첩장입니다.">
-  <meta name="theme-color" content="#EAF3FC">
+  <meta name="theme-color" content="#0A0C10">
   <meta property="og:type" content="website">
   <meta property="og:title" content="함정훈 · 박운진">
   <meta property="og:description" content="2026년 8월 9일, 드레스 가든에서 결혼합니다.">
@@ -21,20 +21,20 @@
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --cream:    #EAF3FC;
-      --ink:      #12314F;
-      --ink-m:    #3D617F;
-      --ink-l:    #8AA6C0;
-      --border:   #C3DAEE;
-      --white:    #F8FCFF;
-      --sky:      #4E9BE0;
-      --sky-deep: #2E77C2;
-      --sky-soft: #A9D3F5;
-      --solo-bg:  #0A1B30;
-      --solo-cream: #EAF3FC;
-      --solo-line: rgba(234,243,252,.22);
-      --solo-red: #45B4CE;
-      --solo-gold: #7FC4E8;
+      --cream:    #0A0C10;
+      --ink:      #ECE6D9;
+      --ink-m:    #9AA0AA;
+      --ink-l:    #6A707A;
+      --border:   #262B34;
+      --white:    #10131A;
+      --sky:      #C6A15B;
+      --sky-deep: #A8843F;
+      --sky-soft: #3A3320;
+      --solo-bg:  #060709;
+      --solo-cream: #ECE6D9;
+      --solo-line: rgba(236,230,217,.18);
+      --solo-red: #C6A15B;
+      --solo-gold: #C6A15B;
       --radius-sm: 14px;
       --radius-md: 18px;
       --radius-lg: 24px;
@@ -1376,9 +1376,86 @@
     }
     .acc-copy:active { background: var(--sky); color: #fff; }
     .acc-copy.copied { background: var(--sky-deep); color: #fff; border-color: var(--sky-deep); }
+    /* ═══════ 시네마틱 필름 테마 ═══════ */
+    .film-intro {
+      position: fixed; inset: 0; z-index: 6000; background: #000;
+      display: flex; align-items: center; justify-content: center; text-align: center;
+      animation: introFade 1s ease 2.6s forwards; cursor: pointer;
+    }
+    .film-intro.hide { opacity: 0; visibility: hidden; transition: opacity .5s ease, visibility .5s ease; }
+    .film-intro__inner { color: #ECE6D9; animation: introIn 1.9s ease both; padding: 0 20px; }
+    .fi-label { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 13px; letter-spacing: .5em; color: var(--sky); margin-bottom: 18px; padding-left: .5em; }
+    .fi-title { font-family: 'Noto Serif KR', serif; font-weight: 300; font-size: 25px; letter-spacing: .1em; }
+    .fi-year { margin-top: 16px; font-family: 'Cormorant Garamond', serif; font-size: 15px; letter-spacing: .4em; color: var(--ink-l); }
+    @keyframes introIn { from { opacity: 0; letter-spacing: .5em; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes introFade { to { opacity: 0; visibility: hidden; } }
+
+    .film-grain {
+      position: fixed; inset: -60%; z-index: 5000; pointer-events: none; opacity: .045;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 180px 180px; animation: grain .6s steps(3) infinite; mix-blend-mode: screen;
+    }
+    @keyframes grain {
+      0% { transform: translate(0,0); } 33% { transform: translate(-5%,3%); }
+      66% { transform: translate(4%,-4%); } 100% { transform: translate(-3%,2%); }
+    }
+    .cine-vignette {
+      position: fixed; inset: 0; z-index: 4900; pointer-events: none;
+      box-shadow: inset 0 0 150px 24px rgba(0,0,0,.7), inset 0 0 40px rgba(0,0,0,.5);
+    }
+    @media (prefers-reduced-motion: reduce) { .film-grain { animation: none; } }
+
+    /* ── HERO 영화 포스터 ─────────────────────── */
+    .hero {
+      position: relative; min-height: 100vh; min-height: 100svh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; overflow: hidden; background: #000; padding: 0;
+    }
+    .hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background: url("photos/hero.jpg?v=3") center 28% / cover no-repeat;
+      transform: scale(1.12); animation: heroZoom 20s ease-out forwards;
+    }
+    .hero-bg::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(6,8,12,.62) 0%, rgba(6,8,12,.12) 32%, rgba(6,8,12,.28) 60%, rgba(6,8,12,.93) 100%);
+    }
+    @keyframes heroZoom { to { transform: scale(1); } }
+    .hero-lb { position: absolute; left: 0; right: 0; height: 7.5vh; min-height: 38px; background: #000; z-index: 2; }
+    .hero-lb-top { top: 0; } .hero-lb-bottom { bottom: 0; }
+    .hero-content { position: relative; z-index: 3; color: #ECE6D9; padding: 0 26px; }
+    .hero-tagline { font-family: 'Cormorant Garamond', serif; font-size: 12px; font-style: italic; letter-spacing: .4em; color: var(--sky); margin-bottom: 22px; padding-left: .4em; }
+    .hero-presents { font-family: 'Cormorant Garamond', serif; font-size: 15px; letter-spacing: .5em; color: rgba(236,230,217,.72); margin-bottom: 18px; padding-left: .5em; }
+    .hero-title { font-family: 'Noto Serif KR', serif; font-weight: 300; font-size: clamp(30px, 10vw, 44px); letter-spacing: .06em; line-height: 1.3; text-shadow: 0 2px 30px rgba(0,0,0,.6); margin: 0; }
+    .hero-title span { display: inline-block; margin: 0 .28em; color: var(--sky); font-size: .7em; vertical-align: middle; }
+    .hero-date { margin-top: 20px; font-family: 'Cormorant Garamond', serif; font-size: 20px; letter-spacing: .3em; color: #ECE6D9; padding-left: .3em; }
+    .hero-runtime { margin-top: 26px; font-size: 10.5px; letter-spacing: .35em; color: rgba(236,230,217,.55); }
+    .hero .countdown { margin-top: 28px; }
+    .hero .scroll-hint { color: rgba(236,230,217,.55); position: absolute; bottom: calc(7.5vh + 18px); left: 50%; transform: translateX(-50%); z-index: 3; }
+
+    /* ── 엔딩 크레딧 ─────────────────────────── */
+    .credits { background: #060709; padding: 74px 26px 64px; text-align: center; }
+    .credits-mark { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 13px; letter-spacing: .4em; color: var(--sky); margin-bottom: 44px; padding-left: .4em; }
+    .credit-row { margin-bottom: 28px; }
+    .credit-role { font-size: 10px; letter-spacing: .35em; color: var(--ink-l); margin-bottom: 9px; }
+    .credit-name { font-family: 'Noto Serif KR', serif; font-weight: 300; font-size: 17px; letter-spacing: .08em; color: var(--ink); }
+    .credit-name small { display: block; font-size: 12.5px; color: var(--ink-m); margin-top: 5px; letter-spacing: .04em; }
+    .credits-end { margin-top: 54px; font-family: 'Cormorant Garamond', serif; font-size: 30px; letter-spacing: .3em; color: #ECE6D9; padding-left: .3em; }
+    .credits-end small { display: block; font-size: 12px; letter-spacing: .3em; color: var(--ink-l); margin-top: 16px; padding-left: .3em; }
   </style>
 </head>
 <body>
+<!-- 영화 오프닝 타이틀 카드 -->
+<div class="film-intro" id="filmIntro" onclick="this.classList.add('hide')">
+  <div class="film-intro__inner">
+    <div class="fi-label">A WEDDING FILM</div>
+    <div class="fi-title">함정훈 &amp; 박운진</div>
+    <div class="fi-year">2026</div>
+  </div>
+</div>
+<!-- 필름 그레인 / 비네트 -->
+<div class="film-grain" aria-hidden="true"></div>
+<div class="cine-vignette" aria-hidden="true"></div>
 <div class="page-progress" aria-hidden="true"><div class="page-progress__bar"></div></div>
 
 <svg class="icon-sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
@@ -1444,78 +1521,28 @@
   </div>
 </div>
 
-<!-- ════ HERO ════ -->
-<section class="hero">
-  <div class="hero-names-en reveal">Jung-hoon &amp; Woon-jin</div>
 
-  <div class="photo-frame reveal">
-    <img src="wedding.jpg" alt="함정훈 박운진 웨딩 사진" width="200" height="260" decoding="async" fetchpriority="high"
-         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-    <div class="photo-placeholder" style="display:none">
-      <span style="font-size:36px; opacity:.3">○</span>
-      <span>사진을 넣어주세요</span>
+<!-- ════ HERO (영화 포스터) ════ -->
+<section class="hero" id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-lb hero-lb-top"></div>
+  <div class="hero-lb hero-lb-bottom"></div>
+  <div class="hero-content">
+    <div class="hero-tagline reveal">◍ NOW SHOWING</div>
+    <div class="hero-presents reveal">A LOVE STORY</div>
+    <h1 class="hero-title reveal">함정훈<span>·</span>박운진</h1>
+    <div class="hero-date reveal">2026 · 08 · 09</div>
+    <div class="countdown reveal" id="countdown">
+      <div class="cd-item"><div class="cd-num" id="cd-d">--</div><div class="cd-lbl">DAYS</div></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-item"><div class="cd-num" id="cd-h">--</div><div class="cd-lbl">HRS</div></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-item"><div class="cd-num" id="cd-m">--</div><div class="cd-lbl">MIN</div></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-item"><div class="cd-num" id="cd-s">--</div><div class="cd-lbl">SEC</div></div>
     </div>
+    <div class="hero-runtime reveal">DRESS GARDEN · SEOUL</div>
   </div>
-
-  <div class="hero-names reveal" id="hero-names">함정훈 <em>·</em> 박운진</div>
-  <div class="hero-date reveal">August 9, 2026</div>
-
-  <div class="countdown reveal" id="countdown">
-    <div class="cd-item"><div class="cd-num" id="cd-d">--</div><div class="cd-lbl">DAYS</div></div>
-    <div class="cd-sep">·</div>
-    <div class="cd-item"><div class="cd-num" id="cd-h">--</div><div class="cd-lbl">HRS</div></div>
-    <div class="cd-sep">·</div>
-    <div class="cd-item"><div class="cd-num" id="cd-m">--</div><div class="cd-lbl">MIN</div></div>
-    <div class="cd-sep">·</div>
-    <div class="cd-item"><div class="cd-num" id="cd-s">--</div><div class="cd-lbl">SEC</div></div>
-  </div>
-
-  <!-- 라인드로잉 일러스트 (댄싱 피플) -->
-  <svg class="hero-illus reveal" viewBox="0 0 340 88" fill="none"
-       stroke="var(--ink)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"
-       xmlns="http://www.w3.org/2000/svg">
-    <!-- 왼쪽 여자 - 팔 위로 -->
-    <circle cx="44" cy="15" r="8"/>
-    <path d="M38,23 Q32,44 34,62 Q38,68 44,68 Q50,68 54,62 Q56,44 50,23"/>
-    <path d="M40,32 Q30,24 24,16"/>
-    <path d="M48,30 Q58,24 64,16"/>
-    <path d="M38,68 Q35,76 33,82"/>
-    <path d="M50,68 Q52,76 54,82"/>
-
-    <!-- 신랑 -->
-    <circle cx="132" cy="13" r="9"/>
-    <line x1="132" y1="22" x2="132" y2="56"/>
-    <path d="M126,38 Q110,44 104,52"/>
-    <path d="M138,35 Q154,42 160,46"/>
-    <line x1="132" y1="56" x2="122" y2="80"/>
-    <line x1="132" y1="56" x2="142" y2="80"/>
-    <path d="M129,23 L131,37 L132,34 L133,37 L135,23"/>
-
-    <!-- 신부 (드레스) -->
-    <circle cx="174" cy="13" r="9"/>
-    <path d="M165,22 Q154,46 152,68 Q158,74 174,74 Q190,74 196,68 Q194,46 183,22"/>
-    <path d="M167,36 Q160,42 156,46"/>
-    <path d="M178,33 Q192,28 200,22"/>
-    <path d="M166,10 Q170,4 178,10"/>
-
-    <!-- 오른쪽 여자 -->
-    <circle cx="262" cy="15" r="8"/>
-    <path d="M256,23 Q250,44 252,62 Q256,68 262,68 Q268,68 272,62 Q274,44 268,23"/>
-    <path d="M258,30 Q248,24 242,18"/>
-    <path d="M266,30 Q276,26 282,18"/>
-    <path d="M256,68 Q253,76 252,82"/>
-    <path d="M268,68 Q269,76 272,82"/>
-
-    <!-- 오른쪽 남자 -->
-    <circle cx="314" cy="15" r="8"/>
-    <line x1="314" y1="23" x2="314" y2="56"/>
-    <path d="M308,38 Q298,32 292,26"/>
-    <path d="M320,38 Q330,44 336,52"/>
-    <line x1="314" y1="56" x2="306" y2="80"/>
-    <line x1="314" y1="56" x2="322" y2="80"/>
-    <path d="M311,23 L313,37 L314,34 L315,37 L317,23"/>
-  </svg>
-
   <div class="scroll-hint">scroll</div>
 </section>
 
@@ -1566,18 +1593,30 @@
     <p class="gallery-copy">사진을 누르면 크게 볼 수 있어요</p>
   </div>
   <div class="gallery-grid">
-    <div class="gallery-item reveal" onclick="openLightbox(0)"><img src="photos/w01.jpg?v=2" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 1"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(1)"><img src="photos/w02.jpg?v=2" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 2"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(2)"><img src="photos/w03.jpg?v=2" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 3"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(3)"><img src="photos/w04.jpg?v=2" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 4"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(4)"><img src="photos/w05.jpg?v=2" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 5"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(5)"><img src="photos/w06.jpg?v=2" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 6"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(6)"><img src="photos/w07.jpg?v=2" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 7"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(7)"><img src="photos/w08.jpg?v=2" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 8"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(8)"><img src="photos/w09.jpg?v=2" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 9"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(9)"><img src="photos/w10.jpg?v=2" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 10"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(10)"><img src="photos/w11.jpg?v=2" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 11"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(11)"><img src="photos/w12.jpg?v=2" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 12"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(0)"><img src="photos/w01.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 1"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(1)"><img src="photos/w02.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 2"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(2)"><img src="photos/w03.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 3"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(3)"><img src="photos/w04.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 4"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(4)"><img src="photos/w05.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 5"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(5)"><img src="photos/w06.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 6"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(6)"><img src="photos/w07.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 7"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(7)"><img src="photos/w08.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 8"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(8)"><img src="photos/w09.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 9"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(9)"><img src="photos/w10.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 10"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(10)"><img src="photos/w11.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 11"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(11)"><img src="photos/w12.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 12"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(12)"><img src="photos/w13.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 13"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(13)"><img src="photos/w14.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 14"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(14)"><img src="photos/w15.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 15"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(15)"><img src="photos/w16.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 16"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(16)"><img src="photos/w17.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 17"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(17)"><img src="photos/w18.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 18"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(18)"><img src="photos/w19.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 19"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(19)"><img src="photos/w20.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 20"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(20)"><img src="photos/w21.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 21"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(21)"><img src="photos/w22.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 22"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(22)"><img src="photos/w23.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 23"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(23)"><img src="photos/w24.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 24"></div>
   </div>
 </section>
 
@@ -1706,60 +1745,60 @@
 
   <!-- 지도 SVG 일러스트 -->
   <div class="map-box reveal">
-    <svg viewBox="0 0 480 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#D9E6F3;">
+    <svg viewBox="0 0 480 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#161B22;">
 
       <!-- 블록 배경 -->
-      <rect x="0"   y="0"   width="480" height="280" fill="#D9E6F3"/>
+      <rect x="0"   y="0"   width="480" height="280" fill="#161B22"/>
 
       <!-- 공원/녹지 블록 -->
-      <rect x="20"  y="30"  width="90"  height="60"  fill="#C6DEDA" rx="2"/>
-      <rect x="340" y="160" width="80"  height="70"  fill="#C6DEDA" rx="2"/>
-      <rect x="20"  y="200" width="60"  height="60"  fill="#C6DEDA" rx="2"/>
+      <rect x="20"  y="30"  width="90"  height="60"  fill="#1E2A25" rx="2"/>
+      <rect x="340" y="160" width="80"  height="70"  fill="#1E2A25" rx="2"/>
+      <rect x="20"  y="200" width="60"  height="60"  fill="#1E2A25" rx="2"/>
 
       <!-- 건물 블록들 -->
-      <rect x="20"  y="110" width="55"  height="40"  fill="#C4D6E6" rx="1"/>
-      <rect x="85"  y="110" width="45"  height="40"  fill="#C4D6E6" rx="1"/>
-      <rect x="20"  y="165" width="42"  height="28"  fill="#C4D6E6" rx="1"/>
-      <rect x="72"  y="165" width="58"  height="28"  fill="#C4D6E6" rx="1"/>
-      <rect x="145" y="30"  width="62"  height="42"  fill="#C4D6E6" rx="1"/>
-      <rect x="145" y="82"  width="62"  height="38"  fill="#C4D6E6" rx="1"/>
-      <rect x="145" y="165" width="45"  height="35"  fill="#C4D6E6" rx="1"/>
-      <rect x="145" y="210" width="45"  height="45"  fill="#C4D6E6" rx="1"/>
-      <rect x="340" y="30"  width="70"  height="50"  fill="#C4D6E6" rx="1"/>
-      <rect x="340" y="90"  width="70"  height="58"  fill="#C4D6E6" rx="1"/>
-      <rect x="390" y="165" width="70"  height="50"  fill="#C4D6E6" rx="1"/>
-      <rect x="390" y="225" width="70"  height="45"  fill="#C4D6E6" rx="1"/>
+      <rect x="20"  y="110" width="55"  height="40"  fill="#232A34" rx="1"/>
+      <rect x="85"  y="110" width="45"  height="40"  fill="#232A34" rx="1"/>
+      <rect x="20"  y="165" width="42"  height="28"  fill="#232A34" rx="1"/>
+      <rect x="72"  y="165" width="58"  height="28"  fill="#232A34" rx="1"/>
+      <rect x="145" y="30"  width="62"  height="42"  fill="#232A34" rx="1"/>
+      <rect x="145" y="82"  width="62"  height="38"  fill="#232A34" rx="1"/>
+      <rect x="145" y="165" width="45"  height="35"  fill="#232A34" rx="1"/>
+      <rect x="145" y="210" width="45"  height="45"  fill="#232A34" rx="1"/>
+      <rect x="340" y="30"  width="70"  height="50"  fill="#232A34" rx="1"/>
+      <rect x="340" y="90"  width="70"  height="58"  fill="#232A34" rx="1"/>
+      <rect x="390" y="165" width="70"  height="50"  fill="#232A34" rx="1"/>
+      <rect x="390" y="225" width="70"  height="45"  fill="#232A34" rx="1"/>
 
       <!-- 도로: 세로 작은 도로들 -->
-      <rect x="136" y="0"   width="9"   height="280" fill="#EDF4FB"/>
-      <rect x="330" y="0"   width="9"   height="280" fill="#EDF4FB"/>
-      <rect x="0"   y="100" width="480" height="9"   fill="#EDF4FB"/>
-      <rect x="0"   y="158" width="480" height="9"   fill="#EDF4FB"/>
+      <rect x="136" y="0"   width="9"   height="280" fill="#2E353F"/>
+      <rect x="330" y="0"   width="9"   height="280" fill="#2E353F"/>
+      <rect x="0"   y="100" width="480" height="9"   fill="#2E353F"/>
+      <rect x="0"   y="158" width="480" height="9"   fill="#2E353F"/>
 
       <!-- 영동대로 — 굵은 메인 도로 (세로) -->
-      <rect x="215" y="0"   width="24"  height="280" fill="#F8FCFF"/>
+      <rect x="215" y="0"   width="24"  height="280" fill="#3C434E"/>
       <!-- 영동대로 센터라인 (점선) -->
-      <line x1="227" y1="0" x2="227" y2="280" stroke="#B9D2E8" stroke-width="1" stroke-dasharray="8,6"/>
+      <line x1="227" y1="0" x2="227" y2="280" stroke="#4A525E" stroke-width="1" stroke-dasharray="8,6"/>
 
       <!-- 학동로 — 굵은 메인 도로 (가로) -->
-      <rect x="0"   y="126" width="480" height="22"  fill="#F8FCFF"/>
+      <rect x="0"   y="126" width="480" height="22"  fill="#3C434E"/>
       <!-- 학동로 센터라인 (점선) -->
-      <line x1="0" y1="137" x2="480" y2="137" stroke="#B9D2E8" stroke-width="1" stroke-dasharray="8,6"/>
+      <line x1="0" y1="137" x2="480" y2="137" stroke="#4A525E" stroke-width="1" stroke-dasharray="8,6"/>
 
       <!-- 도로명 라벨 -->
-      <text x="232" y="52"  font-size="8.5" fill="#7C99B4" font-family="Arial,sans-serif" text-anchor="middle" transform="rotate(90,232,52)">영동대로</text>
-      <text x="232" y="232" font-size="8.5" fill="#7C99B4" font-family="Arial,sans-serif" text-anchor="middle" transform="rotate(90,232,232)">영동대로</text>
-      <text x="80"  y="133" font-size="8.5" fill="#7C99B4" font-family="Arial,sans-serif" text-anchor="middle">학동로</text>
-      <text x="400" y="133" font-size="8.5" fill="#7C99B4" font-family="Arial,sans-serif" text-anchor="middle">학동로</text>
+      <text x="232" y="52"  font-size="8.5" fill="#8A93A0" font-family="Arial,sans-serif" text-anchor="middle" transform="rotate(90,232,52)">영동대로</text>
+      <text x="232" y="232" font-size="8.5" fill="#8A93A0" font-family="Arial,sans-serif" text-anchor="middle" transform="rotate(90,232,232)">영동대로</text>
+      <text x="80"  y="133" font-size="8.5" fill="#8A93A0" font-family="Arial,sans-serif" text-anchor="middle">학동로</text>
+      <text x="400" y="133" font-size="8.5" fill="#8A93A0" font-family="Arial,sans-serif" text-anchor="middle">학동로</text>
 
       <!-- 청담역 (7호선) 아이콘 -->
-      <circle cx="227" cy="137" r="11" fill="#45742C" stroke="#F8FCFF" stroke-width="2"/>
+      <circle cx="227" cy="137" r="11" fill="#45742C" stroke="#3C434E" stroke-width="2"/>
       <text x="227" y="141" font-size="9" fill="white" font-family="Arial,sans-serif" font-weight="bold" text-anchor="middle">7</text>
       <!-- 청담역 라벨 -->
       <rect x="192" y="152" width="46" height="15" fill="white" rx="2" opacity="0.9"/>
-      <text x="215" y="163" font-size="9" fill="#12314F" font-family="'Noto Sans KR',Arial,sans-serif" font-weight="bold" text-anchor="middle">청담역</text>
+      <text x="215" y="163" font-size="9" fill="#C6A15B" font-family="'Noto Sans KR',Arial,sans-serif" font-weight="bold" text-anchor="middle">청담역</text>
       <!-- 13번 출구 표시 -->
-      <circle cx="258" cy="137" r="7" fill="#F8FCFF" stroke="#45742C" stroke-width="1.5"/>
+      <circle cx="258" cy="137" r="7" fill="#3C434E" stroke="#45742C" stroke-width="1.5"/>
       <text x="258" y="141" font-size="7" fill="#45742C" font-family="Arial,sans-serif" font-weight="bold" text-anchor="middle">13</text>
 
       <!-- 드레스가든 핀 -->
@@ -1767,19 +1806,19 @@
       <ellipse cx="280" cy="108" rx="6" ry="3" fill="rgba(0,0,0,0.12)"/>
       <!-- 핀 몸통 -->
       <path d="M280,60 C268,60 260,69 260,79 C260,94 280,108 280,108 C280,108 300,94 300,79 C300,69 292,60 280,60 Z"
-            fill="#12314F" stroke="none"/>
+            fill="#C6A15B" stroke="none"/>
       <!-- 핀 내부 원 -->
-      <circle cx="280" cy="79" r="7" fill="#F8FCFF"/>
+      <circle cx="280" cy="79" r="7" fill="#3C434E"/>
       <!-- 핀 라벨 -->
       <rect x="234" y="42" width="92" height="18" fill="white" rx="9" opacity="0.95"
             filter="url(#shadow)"/>
-      <text x="280" y="55" font-size="9.5" fill="#12314F" font-family="'Noto Sans KR',Arial,sans-serif" font-weight="bold" text-anchor="middle">드레스 가든</text>
+      <text x="280" y="55" font-size="9.5" fill="#C6A15B" font-family="'Noto Sans KR',Arial,sans-serif" font-weight="bold" text-anchor="middle">드레스 가든</text>
 
       <!-- 핀 → 역 연결 점선 -->
-      <line x1="280" y1="109" x2="248" y2="128" stroke="#12314F" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+      <line x1="280" y1="109" x2="248" y2="128" stroke="#C6A15B" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
 
       <!-- 도보 거리 라벨 -->
-      <rect x="246" y="113" width="38" height="13" fill="#12314F" rx="6"/>
+      <rect x="246" y="113" width="38" height="13" fill="#C6A15B" rx="6"/>
       <text x="265" y="123" font-size="7.5" fill="white" font-family="Arial,sans-serif" text-anchor="middle">도보 1분</text>
 
       <defs>
@@ -1969,6 +2008,34 @@
       </button>
     </div>
   </div>
+</section>
+
+<!-- ════ 엔딩 크레딧 ════ -->
+<section class="credits">
+  <div class="credits-mark reveal">Ending Credits</div>
+  <div class="credit-row reveal">
+    <div class="credit-role">CAST</div>
+    <div class="credit-name">함정훈 <small>as 신랑</small></div>
+  </div>
+  <div class="credit-row reveal">
+    <div class="credit-name">박운진 <small>as 신부</small></div>
+  </div>
+  <div class="credit-row reveal">
+    <div class="credit-role">PRESENTED BY</div>
+    <div class="credit-name">함상구 · 김미선 <small>신랑측 혼주</small></div>
+  </div>
+  <div class="credit-row reveal">
+    <div class="credit-name">고현숙 <small>신부측 혼주</small></div>
+  </div>
+  <div class="credit-row reveal">
+    <div class="credit-role">DATE</div>
+    <div class="credit-name">2026 · 08 · 09 <small>토요일 오후 2시 30분</small></div>
+  </div>
+  <div class="credit-row reveal">
+    <div class="credit-role">LOCATION</div>
+    <div class="credit-name">드레스가든 <small>4F 블리스돔 · 서울 강남</small></div>
+  </div>
+  <div class="credits-end reveal">The End<small>그리고, 새로운 시작</small></div>
 </section>
 
 <!-- ════ FOOTER ════ -->
