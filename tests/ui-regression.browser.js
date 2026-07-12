@@ -1,5 +1,8 @@
 async () => {
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const scrollRoot = document.documentElement;
+  const previousScrollBehavior = scrollRoot.style.scrollBehavior;
+  scrollRoot.style.scrollBehavior = 'auto';
   const waitFor = async (predicate, timeoutMs = 4000) => {
     const startedAt = performance.now();
     while (!predicate() && performance.now() - startedAt < timeoutMs) await sleep(50);
@@ -162,6 +165,7 @@ async () => {
     visibleCarouselMoves,
     failures
   };
+  scrollRoot.style.scrollBehavior = previousScrollBehavior;
   if (failures.length) throw new Error(JSON.stringify(report));
   return report;
 }
