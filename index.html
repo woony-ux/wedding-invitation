@@ -35,6 +35,10 @@
       --solo-line: rgba(236,230,217,.18);
       --solo-red: #C6A15B;
       --solo-gold: #C6A15B;
+      --paper-ink: #0A0C10;
+      --paper-ink-m: #3F454D;
+      --paper-ink-l: #555B64;
+      --paper-gold: #76561F;
       --radius-sm: 14px;
       --radius-md: 18px;
       --radius-lg: 24px;
@@ -447,13 +451,13 @@
       background: var(--white); padding: 0 12px;
       font-family: 'Cormorant Garamond', serif;
       font-style: italic; font-size: 11px;
-      letter-spacing: 3px; color: var(--ink-l);
+      letter-spacing: 3px; color: var(--ink-m);
     }
     .party-text {
-      font-size: 13.5px; line-height: 2.4; color: var(--ink-m);
+      font-size: 13.5px; line-height: 2.4; color: var(--paper-ink);
       word-break: keep-all; font-weight: 300;
     }
-    .party-text strong { color: var(--ink); font-weight: 500; }
+    .party-text strong { color: var(--paper-ink); font-weight: 500; }
 
     /* ── 예식 안내 ─────────────────────────────────── */
     .detail-list { display: flex; flex-direction: column; gap: 0; }
@@ -514,7 +518,7 @@
       font-family: 'Cormorant Garamond', serif;
       font-style: italic;
       font-size: 13px;
-      color: rgba(244,239,226,.45);
+      color: var(--paper-gold);
       letter-spacing: 4px;
       margin-bottom: 12px;
       text-transform: uppercase;
@@ -529,7 +533,7 @@
     }
     .lucky-copy {
       font-size: 13px;
-      color: rgba(244,239,226,.76);
+      color: var(--paper-ink-m);
       line-height: 2;
       word-break: keep-all;
       font-weight: 300;
@@ -570,20 +574,20 @@
     .prize-name {
       font-family: 'Noto Serif KR', serif;
       font-size: 16px;
-      color: rgba(244,239,226,.96);
+      color: var(--paper-ink);
       margin-bottom: 4px;
       font-weight: 300;
     }
     .prize-note {
       font-size: 11px;
-      color: rgba(244,239,226,.62);
+      color: var(--paper-ink-m);
       line-height: 1.6;
     }
     .prize-count {
       font-family: 'Cormorant Garamond', serif;
       font-style: italic;
       font-size: 13px;
-      color: rgba(216,180,106,.86);
+      color: var(--paper-gold);
       letter-spacing: 1px;
       white-space: nowrap;
     }
@@ -618,7 +622,7 @@
       font-family: 'Cormorant Garamond', serif;
       font-style: italic;
       font-size: 12px;
-      color: var(--ink-l);
+      color: var(--ink-m);
       letter-spacing: 3px;
       margin-bottom: 10px;
     }
@@ -637,7 +641,7 @@
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,.86),
         inset 0 -1px 0 rgba(24,20,14,.08);
-      color: var(--ink);
+      color: var(--paper-ink);
       font-variant-numeric: tabular-nums;
     }
     .ticket-machine::before {
@@ -727,7 +731,7 @@
       width: 100%;
       font-family: 'Cormorant Garamond', serif;
       line-height: 1;
-      color: var(--ink);
+      color: var(--paper-ink);
       text-shadow: 0 1px 0 rgba(255,255,255,.72);
       font-variant-numeric: tabular-nums;
       pointer-events: none;
@@ -782,7 +786,7 @@
     }
     .ticket-help {
       font-size: 12px;
-      color: var(--ink-l);
+      color: var(--ink-m);
       line-height: 1.8;
       word-break: keep-all;
     }
@@ -977,7 +981,7 @@
         var(--paper-light),
         var(--solo-cream);
       background-size: auto, 150px 150px, 190px 190px, 12px 12px;
-      color: var(--ink);
+      color: var(--paper-ink);
       border: 1px solid rgba(248,241,229,.36);
       box-shadow: 0 14px 30px rgba(0,0,0,.22);
     }
@@ -1008,21 +1012,21 @@
       font-family: 'Cormorant Garamond', serif;
       font-style: italic;
       font-size: 14px;
-      color: var(--ink-l);
+      color: var(--paper-ink-l);
       font-weight: 300;
       letter-spacing: 1px;
     }
     .s-show-logo b {
       font-family: 'Noto Sans KR', sans-serif;
       font-weight: 700;
-      color: var(--solo-red);
+      color: var(--paper-gold);
       font-size: 12px;
       font-style: normal;
       letter-spacing: .5px;
     }
     .s-brand {
       font-size: 9px;
-      color: var(--ink-l);
+      color: var(--paper-ink-l);
       letter-spacing: 1.4px;
       text-align: right;
       line-height: 1.5;
@@ -1048,7 +1052,7 @@
       font-family: 'Cormorant Garamond', serif;
       font-size: 14px;
       font-style: italic;
-      color: var(--solo-red);
+      color: var(--paper-gold);
       letter-spacing: 1px;
       line-height: 1;
       box-shadow: inset 0 1px 0 rgba(255,255,255,.78);
@@ -1056,27 +1060,27 @@
     .s-tagline {
       font-family: 'Noto Serif KR', serif;
       font-size: 12px;
-      color: var(--ink-m);
+      color: var(--paper-ink-m);
       line-height: 1.45;
       margin: 0 0 4px;
       font-weight: 300;
     }
-    .s-tagline .hl { color: var(--solo-red); font-style: normal; font-weight: 500; }
+    .s-tagline .hl { color: var(--paper-gold); font-style: normal; font-weight: 500; }
     .s-name {
       font-family: 'Noto Serif KR', serif;
-      font-size: 22px; font-weight: 400; color: var(--ink); margin-bottom: 3px;
+      font-size: 22px; font-weight: 400; color: var(--paper-ink); margin-bottom: 3px;
     }
-    .s-info { font-size: 12px; color: var(--ink-l); margin-bottom: 7px; }
+    .s-info { font-size: 12px; color: var(--paper-ink-l); margin-bottom: 7px; }
     .s-mbti {
       justify-self: start;
       display: inline-block; padding: 3px 9px;
       border: 1px solid rgba(200,79,91,.42);
-      border-radius: 999px; font-size: 10px; color: var(--solo-red); margin-bottom: 7px;
+      border-radius: 999px; font-size: 10px; color: var(--paper-gold); margin-bottom: 7px;
       letter-spacing: 1px;
     }
     .s-intro {
       font-size: 12px;
-      color: var(--ink-m);
+      color: var(--paper-ink-m);
       line-height: 1.55;
       word-break: keep-all;
       display: -webkit-box;
@@ -1094,7 +1098,7 @@
         linear-gradient(135deg, rgba(255,255,255,.34), transparent 44%),
         var(--paper-light);
       background-size: auto, 150px 150px, 190px 190px, 12px 12px;
-      color: var(--ink);
+      color: var(--paper-ink);
       border: 1px solid rgba(248,241,229,.38);
       border-radius: var(--radius-lg); padding: 34px 20px 22px;
       box-shadow: 0 18px 42px rgba(0,0,0,.24);
@@ -1111,13 +1115,13 @@
       font-style: italic;
       font-size: 11px;
       letter-spacing: 3px;
-      color: var(--ink-l);
+      color: var(--paper-ink-l);
       white-space: nowrap;
     }
     .solo-form-title {
       font-family: 'Noto Serif KR', serif;
       font-size: 22px; font-weight: 300;
-      color: var(--ink); text-align: center; margin-bottom: 8px;
+      color: var(--paper-ink); text-align: center; margin-bottom: 8px;
       letter-spacing: 3px;
       position: relative;
     }
@@ -1129,17 +1133,17 @@
       background: var(--solo-red);
       margin: 13px auto 0;
     }
-    .solo-form-sub { font-size: 12px; color: var(--ink-l); text-align: center; margin: 0 0 28px; letter-spacing: .4px; line-height: 1.8; }
+    .solo-form-sub { font-size: 12px; color: var(--paper-ink-l); text-align: center; margin: 0 0 28px; letter-spacing: .4px; line-height: 1.8; }
     .fg { margin-bottom: 14px; }
-    .fg-label { display: block; font-size: 10px; color: var(--ink-l); letter-spacing: 2px; margin-bottom: 7px; text-transform: uppercase; }
+    .fg-label { display: block; font-size: 10px; color: var(--paper-ink-l); letter-spacing: 2px; margin-bottom: 7px; text-transform: uppercase; }
     .fg-input, .fg-textarea {
       width: 100%; padding: 13px 14px;
       background: #FFF9EF; border: 1px solid var(--border);
       border-radius: var(--radius-sm); font-family: 'Noto Sans KR', sans-serif;
-      font-size: 14px; color: var(--ink); outline: none; transition: border-color .2s, background .2s, box-shadow .2s;
+      font-size: 14px; color: var(--paper-ink); outline: none; transition: border-color .2s, background .2s, box-shadow .2s;
       -webkit-appearance: none;
     }
-    .fg-input::placeholder, .fg-textarea::placeholder { color: #B8AEA2; }
+    .fg-input::placeholder, .fg-textarea::placeholder { color: var(--paper-ink-l); }
     .fg-input[type="number"]::-webkit-outer-spin-button,
     .fg-input[type="number"]::-webkit-inner-spin-button {
       -webkit-appearance: none;
@@ -1168,7 +1172,7 @@
       position: relative;
       min-height: 46px;
       display: block;
-      font-size: 13.5px; color: var(--ink-m); cursor: pointer;
+      font-size: 13.5px; color: var(--paper-ink-m); cursor: pointer;
       font-weight: 500;
       letter-spacing: .2px;
     }
@@ -1234,7 +1238,7 @@
       transition: background .2s, transform .2s;
       box-shadow: inset 0 0 0 1px rgba(244,239,226,.18);
     }
-    .btn-solo:hover { background: #2A241B; }
+    .btn-solo:hover { background: #2A241B; color: var(--ink); }
     .btn-solo:active { transform: translateY(1px); }
     .btn-ticket:disabled,
     .btn-solo:disabled {
@@ -1250,31 +1254,31 @@
     /* ── 푸터 ──────────────────────────────────────── */
     .footer {
       padding: 64px 32px 56px;
-      background: var(--ink); color: rgba(255,255,255,.6);
+      background: var(--ink); color: var(--paper-ink-m);
       text-align: center;
     }
     .ft-rule { width: 32px; height: 1px; background: rgba(255,255,255,.25); margin: 0 auto 28px; }
     .ft-names {
       font-family: 'Cormorant Garamond', serif;
       font-style: italic; font-size: 26px;
-      color: rgba(255,255,255,.9); margin-bottom: 8px;
+      color: var(--paper-ink); margin-bottom: 8px;
       letter-spacing: 2px;
     }
-    .ft-date { font-family: 'Cormorant Garamond', serif; font-size: 14px; letter-spacing: 4px; color: rgba(255,255,255,.4); margin-bottom: 48px; }
-    .ft-contact-title { font-size: 9px; letter-spacing: 3px; color: rgba(255,255,255,.35); margin-bottom: 16px; text-transform: uppercase; }
+    .ft-date { font-family: 'Cormorant Garamond', serif; font-size: 14px; letter-spacing: 4px; color: var(--paper-ink-l); margin-bottom: 48px; }
+    .ft-contact-title { font-size: 9px; letter-spacing: 3px; color: var(--paper-ink-l); margin-bottom: 16px; text-transform: uppercase; }
     .ft-btns { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
     .btn-call {
       display: inline-flex; align-items: center; gap: 6px;
       padding: 11px 18px;
       border: 1px solid rgba(255,255,255,.2);
       border-radius: var(--radius-pill);
-      color: rgba(255,255,255,.8); font-size: 13px;
+      color: var(--paper-ink); font-size: 13px;
       text-decoration: none; font-family: 'Noto Sans KR', sans-serif;
       font-weight: 300; transition: border-color .2s; letter-spacing: .5px;
     }
     .btn-call:hover { border-color: rgba(255,255,255,.5); }
-    .ft-hosts { font-size: 12px; color: rgba(255,255,255,.35); line-height: 2.4; font-weight: 300; }
-    .ft-copy  { margin-top: 40px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 12px; color: rgba(255,255,255,.2); letter-spacing: 1px; }
+    .ft-hosts { font-size: 12px; color: var(--paper-ink-m); line-height: 2.4; font-weight: 300; }
+    .ft-copy  { margin-top: 40px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 12px; color: var(--paper-ink-l); letter-spacing: 1px; }
     /* ── 갤러리 ─────────────────────────────────────── */
     .gallery-sec { padding: 54px 18px 60px; background-color: var(--white); }
     .gallery-head { text-align: center; margin-bottom: 26px; }
@@ -1393,7 +1397,7 @@
     .film-grain {
       position: fixed; inset: -60%; z-index: 5000; pointer-events: none; opacity: .045;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      background-size: 180px 180px; animation: grain .6s steps(3) infinite; mix-blend-mode: screen;
+      background-size: 180px 180px; animation: none; mix-blend-mode: screen;
     }
     @keyframes grain {
       0% { transform: translate(0,0); } 33% { transform: translate(-5%,3%); }
@@ -1402,6 +1406,12 @@
     .cine-vignette {
       position: fixed; inset: 0; z-index: 4900; pointer-events: none;
       box-shadow: inset 0 0 150px 24px rgba(0,0,0,.7), inset 0 0 40px rgba(0,0,0,.5);
+    }
+    @media (min-width: 481px) and (hover: hover) and (pointer: fine) {
+      .film-grain { animation: grain .6s steps(3) infinite; }
+    }
+    @media (max-width: 480px), (pointer: coarse) {
+      .film-grain { display: none; }
     }
     @media (prefers-reduced-motion: reduce) { .film-grain { animation: none; } }
 
@@ -1593,30 +1603,30 @@
     <p class="gallery-copy">사진을 누르면 크게 볼 수 있어요</p>
   </div>
   <div class="gallery-grid">
-    <div class="gallery-item reveal" onclick="openLightbox(0)"><img src="photos/w01.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 1"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(1)"><img src="photos/w02.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 2"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(2)"><img src="photos/w03.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 3"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(3)"><img src="photos/w04.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 4"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(4)"><img src="photos/w05.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 5"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(5)"><img src="photos/w06.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 6"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(6)"><img src="photos/w07.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 7"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(7)"><img src="photos/w08.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 8"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(8)"><img src="photos/w09.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 9"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(9)"><img src="photos/w10.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 10"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(10)"><img src="photos/w11.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 11"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(11)"><img src="photos/w12.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 12"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(12)"><img src="photos/w13.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 13"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(13)"><img src="photos/w14.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 14"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(14)"><img src="photos/w15.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 15"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(15)"><img src="photos/w16.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 16"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(16)"><img src="photos/w17.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 17"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(17)"><img src="photos/w18.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 18"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(18)"><img src="photos/w19.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 19"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(19)"><img src="photos/w20.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 20"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(20)"><img src="photos/w21.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 21"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(21)"><img src="photos/w22.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 22"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(22)"><img src="photos/w23.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 23"></div>
-    <div class="gallery-item reveal" onclick="openLightbox(23)"><img src="photos/w24.jpg?v=3" loading="lazy" width="3" height="4" alt="함정훈 박운진 웨딩 사진 24"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(0)"><img src="photos/w01.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 1"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(1)"><img src="photos/w02.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 2"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(2)"><img src="photos/w03.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 3"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(3)"><img src="photos/w04.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 4"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(4)"><img src="photos/w05.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 5"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(5)"><img src="photos/w06.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 6"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(6)"><img src="photos/w07.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 7"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(7)"><img src="photos/w08.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 8"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(8)"><img src="photos/w09.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 9"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(9)"><img src="photos/w10.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 10"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(10)"><img src="photos/w11.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 11"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(11)"><img src="photos/w12.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 12"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(12)"><img src="photos/w13.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 13"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(13)"><img src="photos/w14.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 14"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(14)"><img src="photos/w15.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 15"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(15)"><img src="photos/w16.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 16"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(16)"><img src="photos/w17.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 17"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(17)"><img src="photos/w18.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 18"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(18)"><img src="photos/w19.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 19"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(19)"><img src="photos/w20.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 20"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(20)"><img src="photos/w21.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 21"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(21)"><img src="photos/w22.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 22"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(22)"><img src="photos/w23.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 23"></div>
+    <div class="gallery-item reveal" onclick="openLightbox(23)"><img src="photos/w24.jpg?v=3" loading="lazy" decoding="async" width="3" height="4" alt="함정훈 박운진 웨딩 사진 24"></div>
   </div>
 </section>
 
@@ -1796,7 +1806,7 @@
       <text x="227" y="141" font-size="9" fill="white" font-family="Arial,sans-serif" font-weight="bold" text-anchor="middle">7</text>
       <!-- 청담역 라벨 -->
       <rect x="192" y="152" width="46" height="15" fill="white" rx="2" opacity="0.9"/>
-      <text x="215" y="163" font-size="9" fill="#C6A15B" font-family="'Noto Sans KR',Arial,sans-serif" font-weight="bold" text-anchor="middle">청담역</text>
+      <text x="215" y="163" font-size="9" fill="#76561F" font-family="'Noto Sans KR',Arial,sans-serif" font-weight="bold" text-anchor="middle">청담역</text>
       <!-- 13번 출구 표시 -->
       <circle cx="258" cy="137" r="7" fill="#3C434E" stroke="#45742C" stroke-width="1.5"/>
       <text x="258" y="141" font-size="7" fill="#45742C" font-family="Arial,sans-serif" font-weight="bold" text-anchor="middle">13</text>
@@ -1812,14 +1822,14 @@
       <!-- 핀 라벨 -->
       <rect x="234" y="42" width="92" height="18" fill="white" rx="9" opacity="0.95"
             filter="url(#shadow)"/>
-      <text x="280" y="55" font-size="9.5" fill="#C6A15B" font-family="'Noto Sans KR',Arial,sans-serif" font-weight="bold" text-anchor="middle">드레스 가든</text>
+      <text x="280" y="55" font-size="9.5" fill="#76561F" font-family="'Noto Sans KR',Arial,sans-serif" font-weight="bold" text-anchor="middle">드레스 가든</text>
 
       <!-- 핀 → 역 연결 점선 -->
       <line x1="280" y1="109" x2="248" y2="128" stroke="#C6A15B" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
 
       <!-- 도보 거리 라벨 -->
       <rect x="246" y="113" width="38" height="13" fill="#C6A15B" rx="6"/>
-      <text x="265" y="123" font-size="7.5" fill="white" font-family="Arial,sans-serif" text-anchor="middle">도보 1분</text>
+      <text x="265" y="123" font-size="7.5" fill="#0A0C10" font-family="Arial,sans-serif" text-anchor="middle">도보 1분</text>
 
       <defs>
         <filter id="shadow" x="-10%" y="-20%" width="120%" height="160%">
@@ -2164,6 +2174,8 @@ const LUCKY_TICKET_CLOSE = new Date('2026-08-10T00:00:00+09:00');
 let luckySpinTimer = null;
 let luckySpinStep = 0;
 let luckyTicketIssuing = false;
+let luckyTicketVisible = false;
+let luckyTicketObserver = null;
 
 function createLuckyTicketNumber() {
   const array = new Uint32Array(1);
@@ -2262,11 +2274,16 @@ function stopLuckyTicketSpinner() {
     clearInterval(luckySpinTimer);
     luckySpinTimer = null;
   }
+  const numberEl = document.getElementById('ticket-number');
+  if (numberEl) numberEl.classList.remove('is-spinning');
 }
 
 function startLuckyTicketSpinner() {
   const numberEl = document.getElementById('ticket-number');
-  if (!numberEl || getLuckyTicket()) return;
+  if (!numberEl || !luckyTicketVisible || document.hidden || getLuckyTicket()) {
+    stopLuckyTicketSpinner();
+    return;
+  }
   stopLuckyTicketSpinner();
   numberEl.classList.add('is-spinning');
   setLuckyTicketDisplay(createLuckyTicketPreviewNumber(), true);
@@ -2276,7 +2293,32 @@ function startLuckyTicketSpinner() {
   }
   luckySpinTimer = setInterval(() => {
     setLuckyTicketDisplay(createLuckyTicketPreviewNumber(), true);
-  }, 45);
+  }, 120);
+}
+
+function syncLuckyTicketSpinner() {
+  if (luckyTicketVisible && !document.hidden && !getLuckyTicket()) {
+    startLuckyTicketSpinner();
+  } else {
+    stopLuckyTicketSpinner();
+  }
+}
+
+function initLuckyTicketVisibility() {
+  const cardEl = document.getElementById('ticket-card');
+  if (!cardEl) return;
+  if (!('IntersectionObserver' in window)) {
+    luckyTicketVisible = true;
+    document.addEventListener('visibilitychange', syncLuckyTicketSpinner);
+    syncLuckyTicketSpinner();
+    return;
+  }
+  luckyTicketObserver = new IntersectionObserver(entries => {
+    luckyTicketVisible = entries.some(entry => entry.isIntersecting);
+    syncLuckyTicketSpinner();
+  }, { threshold: 0.05, rootMargin: '120px 0px' });
+  luckyTicketObserver.observe(cardEl);
+  document.addEventListener('visibilitychange', syncLuckyTicketSpinner);
 }
 
 function renderLuckyTicket(ticket) {
@@ -2287,7 +2329,8 @@ function renderLuckyTicket(ticket) {
   if (!ticket) {
     helpEl.textContent = '추첨권 번호는 2026년 8월 9일 예식 당일에만 받을 수 있습니다.';
     if (buttonLabel) buttonLabel.textContent = '8월 9일에 번호 받기';
-    startLuckyTicketSpinner();
+    setLuckyTicketDisplay(createLuckyTicketPreviewNumber());
+    syncLuckyTicketSpinner();
     return;
   }
   stopLuckyTicketSpinner();
@@ -2371,6 +2414,7 @@ async function issueLuckyTicket() {
 }
 
 renderLuckyTicket(getLuckyTicket());
+initLuckyTicketVisibility();
 
 /* ── 나는 솔로 ───────────────────────────────────── */
 const SOLO_APPLICATIONS_KEY = 'wedding-solo-applications';
@@ -2453,6 +2497,8 @@ function escapeHtml(value) {
 let soloCarouselTimer = null;
 let soloCarouselResumeTimer = null;
 let soloCarouselIndex = 0;
+let soloCarouselVisible = false;
+let soloCarouselObserver = null;
 
 function getSoloCarouselCards() {
   return Array.from(document.querySelectorAll('#solo-cards .s-card'));
@@ -2491,7 +2537,7 @@ function stopSoloCarousel() {
 }
 
 function scheduleSoloCarouselResume() {
-  if (prefersReducedMotion) return;
+  if (prefersReducedMotion || !soloCarouselVisible || document.hidden) return;
   clearTimeout(soloCarouselResumeTimer);
   soloCarouselResumeTimer = setTimeout(startSoloCarousel, 3200);
 }
@@ -2518,7 +2564,10 @@ function bindSoloCarousel() {
 function startSoloCarousel() {
   const box = document.getElementById('solo-cards');
   const cards = getSoloCarouselCards();
-  if (!box || prefersReducedMotion || cards.length < 2) return;
+  if (!box || prefersReducedMotion || !soloCarouselVisible || document.hidden || cards.length < 2) {
+    stopSoloCarousel();
+    return;
+  }
 
   stopSoloCarousel();
   soloCarouselTimer = setInterval(() => {
@@ -2536,6 +2585,32 @@ function initSoloCarousel() {
   soloCarouselIndex = 0;
   moveSoloCarousel(0, 'auto');
   startSoloCarousel();
+}
+
+function syncSoloCarousel() {
+  clearTimeout(soloCarouselResumeTimer);
+  if (soloCarouselVisible && !document.hidden) {
+    startSoloCarousel();
+  } else {
+    stopSoloCarousel();
+  }
+}
+
+function initSoloCarouselVisibility() {
+  const box = document.getElementById('solo-cards');
+  if (!box) return;
+  if (!('IntersectionObserver' in window)) {
+    soloCarouselVisible = true;
+    document.addEventListener('visibilitychange', syncSoloCarousel);
+    syncSoloCarousel();
+    return;
+  }
+  soloCarouselObserver = new IntersectionObserver(entries => {
+    soloCarouselVisible = entries.some(entry => entry.isIntersecting);
+    syncSoloCarousel();
+  }, { threshold: 0.1, rootMargin: '100px 0px' });
+  soloCarouselObserver.observe(box);
+  document.addEventListener('visibilitychange', syncSoloCarousel);
 }
 
 function renderSoloCards() {
@@ -2575,6 +2650,7 @@ function renderSoloCards() {
   initSoloCarousel();
 }
 renderSoloCards();
+initSoloCarouselVisibility();
 
 const SOLO_SUBMISSION_ENDPOINT = WEDDING_API_ENDPOINT;
 let soloSubmitting = false;
