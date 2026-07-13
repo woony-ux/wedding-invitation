@@ -9,6 +9,12 @@ const GITHUB_REQUEST_TIMEOUT_MS = Math.max(
   process.env.NODE_ENV === 'test' ? 10 : 1000,
   Number(process.env.GITHUB_REQUEST_TIMEOUT_MS) || 8000
 );
+const SOLO_NOTIFICATION_URL = process.env.SOLO_NOTIFICATION_URL || '';
+const SOLO_NOTIFICATION_SECRET = process.env.SOLO_NOTIFICATION_SECRET || '';
+const SOLO_NOTIFICATION_TIMEOUT_MS = Math.max(
+  process.env.NODE_ENV === 'test' ? 10 : 1000,
+  Number(process.env.SOLO_NOTIFICATION_TIMEOUT_MS) || 5000
+);
 const pendingLuckyTickets = new Map();
 const recentLuckyTickets = new Map();
 const RECENT_TICKET_TTL_MS = 5 * 60 * 1000;
@@ -48,6 +54,7 @@ async function handler(req, res) {
         status: 'configured',
         storageConfigured: true,
         storage: 'github-contents',
+        soloNotificationConfigured: isSoloNotificationConfigured(),
         luckyTicketWindow: {
           openAt: LUCKY_TICKET_OPEN.toISOString(),
           closeAt: LUCKY_TICKET_CLOSE.toISOString()
@@ -164,6 +171,7 @@ async function submitSoloApplication(payload) {
   const existing = await getRepoFile(path);
 
   if (existing) {
+    await notifyStoredSoloApplication(existing);
     return {
       ok: true,
       duplicate: true,
@@ -180,7 +188,9 @@ async function submitSoloApplication(payload) {
       }, null, 2))
     });
   } catch (error) {
-    if (error.status === 422 && await getRepoFile(path)) {
+    const storedAfterConflict = error.status === 422 ? await getRepoFile(path) : null;
+    if (storedAfterConflict) {
+      await notifyStoredSoloApplication(storedAfterConflict);
       return {
         ok: true,
         duplicate: true,
@@ -190,11 +200,79 @@ async function submitSoloApplication(payload) {
     throw error;
   }
 
+  await attemptSoloNotification(application, receivedAt);
+
   return {
     ok: true,
     duplicate: false,
     applicationId: application.applicationId
   };
+}
+
+async function notifyStoredSoloApplication(file) {
+  const record = parseStoredSoloApplication(file);
+  if (!record) return false;
+  return attemptSoloNotification(record.application, record.receivedAt);
+}
+
+function parseStoredSoloApplication(file) {
+  if (!file || !file.content) return null;
+  try {
+    const record = JSON.parse(fromBase64(file.content));
+    if (!record || !record.receivedAt || !record.application) return null;
+    return {
+      receivedAt: String(record.receivedAt),
+      application: validateApplication(record.application)
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function attemptSoloNotification(application, receivedAt) {
+  try {
+    return await notifySoloApplication(application, receivedAt);
+  } catch (error) {
+    console.error('solo_notification_failed', error && error.message ? error.message : 'unknown_error');
+    return false;
+  }
+}
+
+async function notifySoloApplication(application, receivedAt) {
+  if (!isSoloNotificationConfigured()) return false;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), SOLO_NOTIFICATION_TIMEOUT_MS);
+  try {
+    const response = await fetch(SOLO_NOTIFICATION_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'notify_solo_application',
+        notificationSecret: SOLO_NOTIFICATION_SECRET,
+        receivedAt,
+        application
+      }),
+      signal: controller.signal
+    });
+    if (!response.ok) throw new Error(`notification_${response.status}`);
+
+    const result = await response.json();
+    if (!result || result.ok !== true) throw new Error('notification_rejected');
+    return true;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function isSoloNotificationConfigured() {
+  if (!SOLO_NOTIFICATION_URL || !SOLO_NOTIFICATION_SECRET) return false;
+  try {
+    const url = new URL(SOLO_NOTIFICATION_URL);
+    return url.protocol === 'https:' && url.hostname === 'script.google.com';
+  } catch {
+    return false;
+  }
 }
 
 async function issueLuckyTicket(payload, now = new Date()) {

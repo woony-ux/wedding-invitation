@@ -12,6 +12,9 @@ const WEDDING_TIMEZONE = 'Asia/Seoul';
 const LUCKY_TICKET_OPEN_ISO = '2026-08-09T00:00:00+09:00';
 const LUCKY_TICKET_CLOSE_ISO = '2026-08-10T00:00:00+09:00';
 const MAX_TICKET_NUMBER = 9999;
+const SOLO_NOTIFICATION_EMAIL = 'kham0126@gmail.com';
+const SOLO_NOTIFICATION_SECRET_PROPERTY = 'SOLO_NOTIFICATION_SECRET';
+const SOLO_NOTIFICATION_SENT_PREFIX = 'SOLO_NOTIFICATION_SENT_';
 
 const APPLICATION_HEADERS = [
   'received_at',
@@ -53,7 +56,8 @@ const TICKET_HEADERS = [
   'user_agent'
 ];
 
-function doGet() {
+function doGet(event) {
+  if (!event) MailApp.getRemainingDailyQuota();
   return json_({
     ok: true,
     service: 'wedding-invitation',
@@ -73,6 +77,10 @@ function doPost(event) {
   try {
     const payload = parsePayload_(event);
     const action = sanitizeCell_(payload.action || inferAction_(payload), 40);
+
+    if (action === 'notify_solo_application') {
+      return json_(notifySoloApplication_(payload));
+    }
 
     if (action === 'submit_solo_application') {
       return json_(submitSoloApplication_(payload));
@@ -101,6 +109,95 @@ function setupSpreadsheet() {
     spreadsheetId: spreadsheet.getId(),
     spreadsheetUrl: spreadsheet.getUrl()
   };
+}
+
+function setSoloNotificationSecret(secret) {
+  const value = String(secret || '').trim();
+  if (value.length < 32) {
+    throw new Error('notification_secret_too_short');
+  }
+  PropertiesService.getScriptProperties().setProperty(
+    SOLO_NOTIFICATION_SECRET_PROPERTY,
+    value
+  );
+  return { ok: true };
+}
+
+function notifySoloApplication_(payload) {
+  const properties = PropertiesService.getScriptProperties();
+  const expectedSecret = properties.getProperty(SOLO_NOTIFICATION_SECRET_PROPERTY);
+  if (!secretsMatch_(payload.notificationSecret, expectedSecret)) {
+    throw new Error('unauthorized_notification');
+  }
+
+  const application = validateApplication_(payload.application || {});
+  const receivedAt = sanitizeCell_(payload.receivedAt, 40);
+  const sentProperty = SOLO_NOTIFICATION_SENT_PREFIX + sha256_(application.applicationId);
+  const lock = LockService.getScriptLock();
+  lock.waitLock(8000);
+
+  try {
+    if (properties.getProperty(sentProperty)) {
+      return {
+        ok: true,
+        duplicate: true,
+        applicationId: application.applicationId
+      };
+    }
+    if (MailApp.getRemainingDailyQuota() < 1) {
+      throw new Error('mail_quota_exhausted');
+    }
+
+    MailApp.sendEmail({
+      to: SOLO_NOTIFICATION_EMAIL,
+      subject: '[결혼식 나는 SOLO] 새 신청 - ' +
+        singleLine_(application.side) + ' · ' + singleLine_(application.name),
+      body: formatSoloNotificationBody_(application, receivedAt),
+      name: '정훈·운진 결혼식'
+    });
+    properties.setProperty(sentProperty, receivedAt || new Date().toISOString());
+
+    return {
+      ok: true,
+      duplicate: false,
+      applicationId: application.applicationId
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function formatSoloNotificationBody_(application, receivedAt) {
+  return [
+    '나는 SOLO 신청이 접수되었습니다.',
+    '',
+    '접수 시각: ' + (receivedAt || '(확인 필요)'),
+    '신청 ID: ' + application.applicationId,
+    '이름: ' + application.name,
+    '나이: ' + application.age,
+    '성별: ' + application.gender,
+    '구분: ' + application.side,
+    '직업: ' + application.job,
+    'MBTI: ' + (application.mbti || '(미입력)'),
+    '별명: ' + (application.alias || '(미입력)'),
+    '연락처: ' + (application.contact || '(미입력)'),
+    '자기소개: ' + application.intro
+  ].join('\n');
+}
+
+function secretsMatch_(provided, expected) {
+  if (!provided || !expected) return false;
+  const providedHash = sha256_(String(provided));
+  const expectedHash = sha256_(String(expected));
+  let mismatch = 0;
+  for (let index = 0; index < expectedHash.length; index += 1) {
+    mismatch |= providedHash.charCodeAt(index) ^ expectedHash.charCodeAt(index);
+  }
+  return mismatch === 0;
+}
+
+function singleLine_(value) {
+  return String(value || '').replace(/[\r\n]+/g, ' ').trim();
 }
 
 function submitSoloApplication_(payload) {
