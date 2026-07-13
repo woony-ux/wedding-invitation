@@ -8,6 +8,9 @@ process.env.GITHUB_DATA_TOKEN = 'test-token';
 process.env.WEDDING_DATA_REPO = 'owner/repo';
 process.env.LUCKY_TICKET_FORCE_OPEN = 'true';
 process.env.GITHUB_REQUEST_TIMEOUT_MS = '30';
+process.env.SOLO_NOTIFICATION_URL = 'https://script.google.com/macros/s/test-notifier/exec';
+process.env.SOLO_NOTIFICATION_SECRET = 'test-notification-secret';
+process.env.SOLO_NOTIFICATION_TIMEOUT_MS = '30';
 process.env.NODE_ENV = 'test';
 
 const handler = require('../api/wedding');
@@ -23,10 +26,13 @@ function response(status, body, headers = {}) {
 function createLedger({
   disconnectFirstPutBodyAfterPersist = false,
   conflictFirstPut = false,
-  synchronizeFirstFileReads = false
+  synchronizeFirstFileReads = false,
+  notificationStatus = 200,
+  notificationStatuses = []
 } = {}) {
   const files = new Map();
   const calls = [];
+  const notifications = [];
   let disconnectedPut = false;
   let conflictedPut = false;
   let synchronizedFileReads = 0;
@@ -35,10 +41,21 @@ function createLedger({
   return {
     files,
     calls,
+    notifications,
     async fetch(url, options = {}) {
       const method = options.method || 'GET';
       const parsed = new URL(url);
       calls.push({ method, path: parsed.pathname, search: parsed.search });
+
+      if (parsed.hostname === 'script.google.com') {
+        notifications.push(JSON.parse(options.body));
+        const currentNotificationStatus = notificationStatuses.length
+          ? notificationStatuses.shift()
+          : notificationStatus;
+        return response(currentNotificationStatus, currentNotificationStatus === 200
+          ? { ok: true, duplicate: false }
+          : { ok: false, error: 'notification_failed' });
+      }
 
       if (method === 'GET' && parsed.pathname.includes('/contents/')) {
         const path = decodeURIComponent(parsed.pathname.split('/contents/')[1]);
@@ -76,6 +93,24 @@ function createLedger({
       }
       throw new Error(`Unexpected GitHub request: ${method} ${parsed.pathname}${parsed.search}`);
     }
+  };
+}
+
+function soloApplication(overrides = {}) {
+  return {
+    action: 'submit_solo_application',
+    id: 'solo-application-1',
+    name: '홍길동',
+    age: 31,
+    gender: '남성',
+    side: '신랑측',
+    job: '개발자',
+    mbti: 'ENFP',
+    intro: '좋은 인연을 만나고 싶습니다.',
+    contact: '010-1234-5678',
+    alias: '길동',
+    recipient: 'attacker@example.com',
+    ...overrides
   };
 }
 
@@ -141,6 +176,37 @@ test('공개 HTTP 주소는 경로와 쿼리를 보존해 HTTPS로 즉시 전환
   assert.deepEqual(redirects, ['https://junghoon-woonjin.kr/path?guest=1#ticket']);
 });
 
+test('나는솔로 응답이 끊긴 뒤 같은 내용을 재시도하면 같은 신청 ID를 유지한다', () => {
+  const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
+  const start = html.indexOf("const SOLO_PENDING_APPLICATION_KEY = 'wedding-solo-pending-application';");
+  const end = html.indexOf('function syncRadioLabels()', start);
+  assert.ok(start > -1 && end > start);
+
+  const values = new Map();
+  let uuid = 0;
+  const context = vm.createContext({
+    JSON,
+    Date,
+    localStorage: {
+      getItem: key => values.get(key) || null,
+      setItem: (key, value) => values.set(key, value),
+      removeItem: key => values.delete(key)
+    },
+    window: { crypto: { randomUUID: () => `solo-id-${++uuid}` } }
+  });
+  vm.runInContext(html.slice(start, end), context);
+  context.__draft = { name: '홍길동', age: 31, intro: '안녕하세요' };
+
+  const first = vm.runInContext('getOrCreatePendingSoloApplication(__draft)', context);
+  const retry = vm.runInContext('getOrCreatePendingSoloApplication(__draft)', context);
+  assert.equal(first.id, 'solo-id-1');
+  assert.equal(retry.id, first.id);
+
+  vm.runInContext('clearPendingSoloApplication(__draft, "solo-id-1")', context);
+  const afterSuccess = vm.runInContext('getOrCreatePendingSoloApplication(__draft)', context);
+  assert.equal(afterSuccess.id, 'solo-id-2');
+});
+
 test('공개 청첩장 도메인의 사전 요청을 허용한다', async () => {
   const result = await invoke({ method: 'OPTIONS' });
   assert.equal(result.status, 204);
@@ -171,6 +237,66 @@ test('허용하지 않은 출처는 GitHub 호출 전에 거절한다', async ()
   const result = await invoke({ origin: 'https://example.com', body: { action: 'issue_lucky_ticket', deviceId: 'blocked' } });
   assert.equal(result.status, 403);
   assert.equal(fetchCalls, 0);
+});
+
+test('신규 나는솔로 신청은 원장 저장 뒤 고정 수신자 알림을 한 번 요청한다', async () => {
+  const ledger = createLedger();
+  global.fetch = ledger.fetch;
+
+  const result = await invoke({ body: soloApplication() });
+
+  assert.equal(result.status, 200);
+  assert.equal(result.data.ok, true);
+  assert.equal(result.data.duplicate, false);
+  assert.equal(ledger.files.size, 1);
+  assert.equal(ledger.notifications.length, 1);
+  assert.equal(ledger.notifications[0].action, 'notify_solo_application');
+  assert.equal(ledger.notifications[0].notificationSecret, 'test-notification-secret');
+  assert.equal(ledger.notifications[0].application.applicationId, 'solo-application-1');
+  assert.equal(ledger.notifications[0].application.recipient, undefined);
+});
+
+test('같은 나는솔로 신청 ID를 다시 보내면 저장은 늘리지 않고 멱등 알림을 재확인한다', async () => {
+  const ledger = createLedger();
+  global.fetch = ledger.fetch;
+
+  const first = await invoke({ body: soloApplication() });
+  const second = await invoke({ body: soloApplication() });
+
+  assert.equal(first.data.duplicate, false);
+  assert.equal(second.data.duplicate, true);
+  assert.equal(ledger.files.size, 1);
+  assert.equal(ledger.notifications.length, 2);
+});
+
+test('메일 서버가 실패해도 저장된 나는솔로 신청은 성공으로 응답한다', async () => {
+  const ledger = createLedger({ notificationStatus: 503 });
+  global.fetch = ledger.fetch;
+
+  const result = await invoke({ body: soloApplication() });
+
+  assert.equal(result.status, 200);
+  assert.equal(result.data.ok, true);
+  assert.equal(result.data.duplicate, false);
+  assert.equal(ledger.files.size, 1);
+  assert.equal(ledger.notifications.length, 1);
+});
+
+test('첫 메일 요청 실패 뒤 같은 신청을 재전송하면 저장 원본으로 알림을 복구한다', async () => {
+  const ledger = createLedger({ notificationStatuses: [503, 200] });
+  global.fetch = ledger.fetch;
+
+  const first = await invoke({ body: soloApplication() });
+  const second = await invoke({
+    body: soloApplication({ name: '변조된 이름', recipient: 'attacker@example.com' })
+  });
+
+  assert.equal(first.data.duplicate, false);
+  assert.equal(second.data.duplicate, true);
+  assert.equal(ledger.files.size, 1);
+  assert.equal(ledger.notifications.length, 2);
+  assert.equal(ledger.notifications[1].application.name, '홍길동');
+  assert.equal(ledger.notifications[1].application.recipient, undefined);
 });
 
 test('발급 시간 경계를 한국시간 기준으로 정확히 판정한다', () => {

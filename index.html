@@ -2778,7 +2778,46 @@ renderSoloCards();
 initSoloCarouselVisibility();
 
 const SOLO_SUBMISSION_ENDPOINT = WEDDING_API_ENDPOINT;
+const SOLO_PENDING_APPLICATION_KEY = 'wedding-solo-pending-application';
 let soloSubmitting = false;
+let soloPendingApplication = null;
+
+function readPendingSoloApplication() {
+  if (soloPendingApplication) return soloPendingApplication;
+  try {
+    const pending = JSON.parse(localStorage.getItem(SOLO_PENDING_APPLICATION_KEY) || 'null');
+    if (!pending || !pending.draftKey || !pending.application || !pending.application.id) return null;
+    soloPendingApplication = pending;
+    return pending;
+  } catch {
+    try { localStorage.removeItem(SOLO_PENDING_APPLICATION_KEY); } catch {}
+    return null;
+  }
+}
+
+function getOrCreatePendingSoloApplication(draft) {
+  const draftKey = JSON.stringify(draft);
+  const pending = readPendingSoloApplication();
+  if (pending && pending.draftKey === draftKey) return pending.application;
+
+  const application = {
+    ...draft,
+    id: window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : `solo-${Date.now()}`,
+    submittedAt: new Date().toISOString()
+  };
+  soloPendingApplication = { draftKey, application };
+  try {
+    localStorage.setItem(SOLO_PENDING_APPLICATION_KEY, JSON.stringify(soloPendingApplication));
+  } catch {}
+  return application;
+}
+
+function clearPendingSoloApplication(draft, applicationId) {
+  const pending = readPendingSoloApplication();
+  if (!pending || pending.draftKey !== JSON.stringify(draft) || pending.application.id !== applicationId) return;
+  soloPendingApplication = null;
+  try { localStorage.removeItem(SOLO_PENDING_APPLICATION_KEY); } catch {}
+}
 
 function syncRadioLabels() {
   document.querySelectorAll('.radio-label').forEach(label => {
@@ -2833,14 +2872,13 @@ async function submitSolo() {
   const sEl     = document.querySelector('input[name="s-side"]:checked');
   if (!name||!age||!job||!intro||!gEl||!sEl) { alert('필수 항목을 모두 입력해주세요!'); return; }
   if (!Number.isInteger(age)||age<20||age>55) { alert('나이를 다시 확인해주세요!'); return; }
-  const newP = {
-    id: window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : `solo-${Date.now()}`,
+  const draft = {
     name, age, job, mbti, gender:gEl.value, side:sEl.value, intro, contact,
     alias: createSoloAlias(getStoredSoloApplications().length),
     tagline: '행복한 인연을 기다리는',
-    submittedAt: new Date().toISOString(),
     source: 'wedding-invitation'
   };
+  const newP = getOrCreatePendingSoloApplication(draft);
 
   try {
     setSoloSubmitPending(true);
@@ -2854,6 +2892,7 @@ async function submitSolo() {
   }
 
   saveSoloApplication(newP);
+  clearPendingSoloApplication(draft, newP.id);
   renderSoloCards();
   document.getElementById('s-name').value = '';
   document.getElementById('s-age').value = '';
