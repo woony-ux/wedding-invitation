@@ -1,6 +1,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
+const fs = require('node:fs');
+const vm = require('node:vm');
 
 process.env.GITHUB_DATA_TOKEN = 'test-token';
 process.env.WEDDING_DATA_REPO = 'owner/repo';
@@ -117,11 +119,40 @@ function findCollidingDeviceIds() {
   throw new Error('test fixture could not find a ticket-number collision');
 }
 
+test('공개 HTTP 주소는 경로와 쿼리를 보존해 HTTPS로 즉시 전환한다', () => {
+  const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
+  const redirectScript = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]
+    .map(match => match[1])
+    .find(script => script.includes("secureUrl.protocol = 'https:'"));
+  assert.ok(redirectScript);
+
+  const redirects = [];
+  vm.runInNewContext(redirectScript, {
+    URL,
+    window: {
+      location: {
+        protocol: 'http:',
+        hostname: 'junghoon-woonjin.kr',
+        href: 'http://junghoon-woonjin.kr/path?guest=1#ticket',
+        replace(value) { redirects.push(value); }
+      }
+    }
+  });
+  assert.deepEqual(redirects, ['https://junghoon-woonjin.kr/path?guest=1#ticket']);
+});
+
 test('공개 청첩장 도메인의 사전 요청을 허용한다', async () => {
   const result = await invoke({ method: 'OPTIONS' });
   assert.equal(result.status, 204);
   assert.equal(result.headers['access-control-allow-origin'], PUBLIC_ORIGIN);
   assert.equal(result.headers['access-control-allow-methods'], 'GET, POST, OPTIONS');
+
+  const insecureOrigin = await invoke({
+    origin: 'http://junghoon-woonjin.kr',
+    body: { action: 'issue_lucky_ticket', deviceId: 'insecure-origin' }
+  });
+  assert.equal(insecureOrigin.status, 403);
+  assert.equal(insecureOrigin.headers['access-control-allow-origin'], undefined);
 });
 
 test('공개 청첩장에서 API 설정 상태를 데이터 생성 없이 확인한다', async () => {
