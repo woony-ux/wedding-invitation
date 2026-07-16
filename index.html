@@ -2104,6 +2104,8 @@
 <script>
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const WEDDING_API_ENDPOINT = window.location.hostname.endsWith('.vercel.app')
+  || window.location.hostname === 'localhost'
+  || window.location.hostname === '127.0.0.1'
   ? '/api/wedding'
   : 'https://wedding-invitation-five-eta.vercel.app/api/wedding';
 
@@ -2562,6 +2564,9 @@ const DUMMY_PROFILES = [
     tagline:'계획까지 멋있는' },
 ];
 const SOLO_ALIAS_POOL = ['영수','영호','영식','영철','광수','상철','정숙','순자','영자','옥순','현숙','정희'];
+let soloServerProfiles = [];
+let soloServerProfilesLoaded = false;
+let soloSessionProfiles = [];
 
 function createSoloAlias(index) {
   const base = SOLO_ALIAS_POOL[index % SOLO_ALIAS_POOL.length];
@@ -2600,14 +2605,67 @@ function saveSoloApplication(application) {
   return applicationWithAlias;
 }
 
+function soloProfileFingerprint(profile) {
+  return [profile.alias, profile.age, profile.job, profile.mbti, profile.gender, profile.side, profile.intro]
+    .map(value => String(value ?? '').trim())
+    .join('|');
+}
+
+function normalizeSoloPublicProfile(profile) {
+  if (!profile || typeof profile !== 'object') return null;
+  const age = Number(profile.age);
+  const normalized = {
+    alias: String(profile.alias || '').trim().slice(0, 20),
+    age,
+    job: String(profile.job || '').trim().slice(0, 30),
+    mbti: String(profile.mbti || '').trim().toUpperCase().slice(0, 4),
+    gender: String(profile.gender || '').trim().slice(0, 10),
+    side: String(profile.side || '').trim().slice(0, 10),
+    intro: String(profile.intro || '').trim().slice(0, 160),
+    tagline: String(profile.tagline || '행복한 인연을 기다리는').trim().slice(0, 40)
+  };
+  if (!normalized.alias || !Number.isInteger(age) || !normalized.job || !normalized.intro) return null;
+  return normalized;
+}
+
 function getSoloList() {
-  const applications = getStoredSoloApplications().slice(0, SOLO_VISIBLE_PROFILE_LIMIT);
+  const seen = new Set();
+  const sourceProfiles = soloServerProfilesLoaded
+    ? [...soloSessionProfiles, ...soloServerProfiles]
+    : getStoredSoloApplications();
+  const applications = sourceProfiles
+    .filter(profile => {
+      const fingerprint = soloProfileFingerprint(profile);
+      if (!fingerprint || seen.has(fingerprint)) return false;
+      seen.add(fingerprint);
+      return true;
+    })
+    .slice(0, SOLO_VISIBLE_PROFILE_LIMIT);
   const dummyCount = Math.max(0, SOLO_VISIBLE_PROFILE_LIMIT - applications.length);
   return [...applications, ...DUMMY_PROFILES.slice(0, dummyCount)].map((profile, index) => ({
     ...profile,
     alias: profile.alias || createSoloAlias(index),
     avatar: `No. ${String(index + 1).padStart(2, '0')}`
   }));
+}
+
+async function loadSoloProfiles() {
+  if (!WEDDING_API_ENDPOINT) return false;
+  try {
+    const separator = WEDDING_API_ENDPOINT.includes('?') ? '&' : '?';
+    const response = await fetch(`${WEDDING_API_ENDPOINT}${separator}action=list_solo_profiles`, {
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!response.ok) return false;
+    const data = await response.json();
+    if (!data || data.ok !== true || !Array.isArray(data.profiles)) return false;
+    soloServerProfiles = data.profiles.map(normalizeSoloPublicProfile).filter(Boolean);
+    soloServerProfilesLoaded = true;
+    renderSoloCards();
+    return true;
+  } catch {
+    return false;
+  }
 }
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, char => ({
@@ -2775,6 +2833,7 @@ function renderSoloCards() {
   initSoloCarousel();
 }
 renderSoloCards();
+loadSoloProfiles();
 initSoloCarouselVisibility();
 
 const SOLO_SUBMISSION_ENDPOINT = WEDDING_API_ENDPOINT;
@@ -2891,7 +2950,9 @@ async function submitSolo() {
     setSoloSubmitPending(false);
   }
 
-  saveSoloApplication(newP);
+  const savedApplication = saveSoloApplication(newP);
+  const sessionProfile = normalizeSoloPublicProfile(savedApplication);
+  if (sessionProfile) soloSessionProfiles = [sessionProfile, ...soloSessionProfiles];
   clearPendingSoloApplication(draft, newP.id);
   renderSoloCards();
   document.getElementById('s-name').value = '';
