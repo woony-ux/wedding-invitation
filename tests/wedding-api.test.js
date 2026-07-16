@@ -57,6 +57,21 @@ function createLedger({
           : { ok: false, error: 'notification_failed' });
       }
 
+      if (method === 'GET' && parsed.pathname.endsWith('/commits')) {
+        const commits = [...files.values()].map(content => {
+          const record = JSON.parse(content);
+          return {
+            commit: {
+              author: { date: record.receivedAt },
+              message: `Add solo application ${record.application.applicationId}`
+            }
+          };
+        }).sort((left, right) => (
+          Date.parse(right.commit.author.date) - Date.parse(left.commit.author.date)
+        ));
+        return response(200, commits);
+      }
+
       if (method === 'GET' && parsed.pathname.includes('/contents/')) {
         const path = decodeURIComponent(parsed.pathname.split('/contents/')[1]);
         if (synchronizeFirstFileReads && !files.has(path) && synchronizedFileReads < 2) {
@@ -125,8 +140,8 @@ function createNodeResponse() {
   };
 }
 
-async function invoke({ method = 'POST', origin = PUBLIC_ORIGIN, body = {}, target = handler } = {}) {
-  const req = { method, headers: { origin, referer: `${origin}/` }, body };
+async function invoke({ method = 'POST', origin = PUBLIC_ORIGIN, body = {}, query = {}, target = handler } = {}) {
+  const req = { method, headers: { origin, referer: `${origin}/` }, body, query };
   const res = createNodeResponse();
   await target(req, res);
   return {
@@ -176,6 +191,20 @@ test('공개 HTTP 주소는 경로와 쿼리를 보존해 HTTPS로 즉시 전환
   assert.deepEqual(redirects, ['https://junghoon-woonjin.kr/path?guest=1#ticket']);
 });
 
+test('로컬 화면은 로컬 API를 사용해 운영 데이터 변경 없이 검증한다', () => {
+  const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
+  const start = html.indexOf("const prefersReducedMotion = window.matchMedia");
+  const end = html.indexOf('let luckyTicketRequestTimeoutMs', start);
+  const context = vm.createContext({
+    window: {
+      location: { hostname: '127.0.0.1' },
+      matchMedia: () => ({ matches: false })
+    }
+  });
+  vm.runInContext(html.slice(start, end), context);
+  assert.equal(vm.runInContext('WEDDING_API_ENDPOINT', context), '/api/wedding');
+});
+
 test('나는솔로 응답이 끊긴 뒤 같은 내용을 재시도하면 같은 신청 ID를 유지한다', () => {
   const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
   const start = html.indexOf("const SOLO_PENDING_APPLICATION_KEY = 'wedding-solo-pending-application';");
@@ -207,6 +236,91 @@ test('나는솔로 응답이 끊긴 뒤 같은 내용을 재시도하면 같은 
   assert.equal(afterSuccess.id, 'solo-id-2');
 });
 
+test('다른 브라우저에서도 서버에 저장된 나는솔로 공개 프로필을 카드에 표시한다', async () => {
+  const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
+  const start = html.indexOf("const SOLO_APPLICATIONS_KEY = 'wedding-solo-applications';");
+  const end = html.indexOf('function escapeHtml(value)', start);
+  assert.ok(start > -1 && end > start);
+
+  const values = new Map();
+  const context = vm.createContext({
+    JSON,
+    WEDDING_API_ENDPOINT: 'https://example.test/api/wedding',
+    localStorage: {
+      getItem: key => values.get(key) || null,
+      setItem: (key, value) => values.set(key, value),
+      removeItem: key => values.delete(key)
+    },
+    fetch: async () => response(200, {
+      ok: true,
+      profiles: [{
+        alias: '영수', age: 31, job: '개발자', mbti: 'ENFP', gender: '남성', side: '신랑측',
+        intro: '좋은 인연을 만나고 싶습니다.', tagline: '행복한 인연을 기다리는'
+      }]
+    }),
+    renderSoloCards() {}
+  });
+  vm.runInContext(html.slice(start, end), context);
+
+  await vm.runInContext('loadSoloProfiles()', context);
+  const profiles = vm.runInContext('getSoloList()', context);
+  assert.equal(profiles[0].alias, '영수');
+  assert.equal(profiles[0].job, '개발자');
+  assert.equal(profiles[0].name, undefined);
+  assert.equal(profiles[0].contact, undefined);
+});
+
+test('서버 공개 목록이 비어 있으면 브라우저 임시 신청 대신 기본 카드만 표시한다', async () => {
+  const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
+  const start = html.indexOf("const SOLO_APPLICATIONS_KEY = 'wedding-solo-applications';");
+  const end = html.indexOf('function escapeHtml(value)', start);
+  const values = new Map([[
+    'wedding-solo-applications',
+    JSON.stringify([{ alias: '로컬', age: 31, job: '개발자', intro: '임시 신청', gender: '남성', side: '신랑측' }])
+  ]]);
+  const context = vm.createContext({
+    JSON,
+    WEDDING_API_ENDPOINT: 'https://example.test/api/wedding',
+    localStorage: {
+      getItem: key => values.get(key) || null,
+      setItem: (key, value) => values.set(key, value),
+      removeItem: key => values.delete(key)
+    },
+    fetch: async () => response(200, { ok: true, profiles: [] }),
+    renderSoloCards() {}
+  });
+  vm.runInContext(html.slice(start, end), context);
+
+  assert.equal(vm.runInContext('getSoloList()[0].alias', context), '로컬');
+  assert.equal(await vm.runInContext('loadSoloProfiles()', context), true);
+  assert.equal(vm.runInContext('getSoloList()[0].alias', context), '영식');
+});
+
+test('서버 공개 목록 조회가 실패하면 브라우저 임시 신청 카드를 유지한다', async () => {
+  const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
+  const start = html.indexOf("const SOLO_APPLICATIONS_KEY = 'wedding-solo-applications';");
+  const end = html.indexOf('function escapeHtml(value)', start);
+  const values = new Map([[
+    'wedding-solo-applications',
+    JSON.stringify([{ alias: '로컬', age: 31, job: '개발자', intro: '임시 신청', gender: '남성', side: '신랑측' }])
+  ]]);
+  const context = vm.createContext({
+    JSON,
+    WEDDING_API_ENDPOINT: 'https://example.test/api/wedding',
+    localStorage: {
+      getItem: key => values.get(key) || null,
+      setItem: (key, value) => values.set(key, value),
+      removeItem: key => values.delete(key)
+    },
+    fetch: async () => response(503, { ok: false }),
+    renderSoloCards() {}
+  });
+  vm.runInContext(html.slice(start, end), context);
+
+  assert.equal(await vm.runInContext('loadSoloProfiles()', context), false);
+  assert.equal(vm.runInContext('getSoloList()[0].alias', context), '로컬');
+});
+
 test('공개 청첩장 도메인의 사전 요청을 허용한다', async () => {
   const result = await invoke({ method: 'OPTIONS' });
   assert.equal(result.status, 204);
@@ -229,6 +343,85 @@ test('공개 청첩장에서 API 설정 상태를 데이터 생성 없이 확인
   assert.equal(result.data.storageConfigured, true);
   assert.equal(result.data.storage, 'github-contents');
   assert.equal(result.data.luckyTicketWindow.openAt, '2026-08-08T15:00:00.000Z');
+});
+
+test('나는솔로 공개 목록은 서버 저장 신청을 최신순으로 제한하고 개인정보를 제외한다', async () => {
+  const ledger = createLedger();
+  const firstApplication = {
+    applicationId: 'solo-public-1', name: '홍길동', age: 31, gender: '남성', side: '신랑측',
+    job: '개발자', mbti: 'ENFP', intro: '좋은 인연을 만나고 싶습니다.', contact: '010-1234-5678',
+    alias: '영수', source: 'wedding-invitation', userAgent: 'private-agent'
+  };
+  const secondApplication = {
+    ...firstApplication,
+    applicationId: 'solo-public-2', name: '김개인', contact: '010-9876-5432', alias: '옥순', age: 29
+  };
+  ledger.files.set('solo/2026-06-14/solo-public-1.json', JSON.stringify({
+    receivedAt: '2026-06-14T10:00:00.000Z', application: firstApplication
+  }));
+  ledger.files.set('solo/2026-07-14/solo-public-2.json', JSON.stringify({
+    receivedAt: '2026-07-14T10:00:00.000Z', application: secondApplication
+  }));
+  ledger.files.set('solo/2026-07-15/solo-public-2.json', JSON.stringify({
+    receivedAt: '2026-07-15T10:00:00.000Z',
+    application: { ...secondApplication, alias: '옥순 최신' }
+  }));
+  global.fetch = ledger.fetch;
+
+  const result = await invoke({
+    method: 'GET',
+    query: { action: 'list_solo_profiles' }
+  });
+
+  assert.equal(result.status, 200);
+  assert.equal(result.data.ok, true);
+  assert.deepEqual(result.data.profiles.map(profile => profile.alias), ['옥순 최신', '영수']);
+  assert.deepEqual(Object.keys(result.data.profiles[0]).sort(), [
+    'age', 'alias', 'gender', 'intro', 'job', 'mbti', 'side', 'tagline'
+  ]);
+  assert.equal(JSON.stringify(result.data).includes('김개인'), false);
+  assert.equal(JSON.stringify(result.data).includes('010-9876-5432'), false);
+  assert.equal(JSON.stringify(result.data).includes('private-agent'), false);
+  assert.match(result.headers['cache-control'], /^public, max-age=60/);
+});
+
+test('나는솔로 공개 목록 원장 조회 장애는 개인정보 없는 재시도 오류로 응답한다', async () => {
+  global.fetch = async () => response(503, { message: 'private upstream detail' });
+
+  const result = await invoke({
+    method: 'GET',
+    query: { action: 'list_solo_profiles' }
+  });
+
+  assert.equal(result.status, 503);
+  assert.deepEqual(result.data, { ok: false, error: 'profile_list_unavailable' });
+  assert.equal(JSON.stringify(result.data).includes('private upstream detail'), false);
+});
+
+test('나는솔로 공개 목록의 개별 신청 조회 장애도 빈 목록으로 숨기지 않는다', async () => {
+  global.fetch = async url => {
+    const parsed = new URL(url);
+    if (parsed.pathname.endsWith('/commits')) {
+      return response(200, [{
+        commit: {
+          author: { date: '2026-07-14T10:00:00.000Z' },
+          message: 'Add solo application solo-public-1'
+        }
+      }]);
+    }
+    if (parsed.pathname.includes('/contents/')) {
+      return response(503, { message: 'private contents failure' });
+    }
+    throw new Error(`Unexpected request: ${parsed.pathname}`);
+  };
+
+  const result = await invoke({
+    method: 'GET',
+    query: { action: 'list_solo_profiles' }
+  });
+
+  assert.equal(result.status, 503);
+  assert.deepEqual(result.data, { ok: false, error: 'profile_list_unavailable' });
 });
 
 test('허용하지 않은 출처는 GitHub 호출 전에 거절한다', async () => {

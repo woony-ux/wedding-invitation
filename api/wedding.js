@@ -15,6 +15,8 @@ const SOLO_NOTIFICATION_TIMEOUT_MS = Math.max(
   process.env.NODE_ENV === 'test' ? 10 : 1000,
   Number(process.env.SOLO_NOTIFICATION_TIMEOUT_MS) || 5000
 );
+const SOLO_PUBLIC_PROFILE_LIMIT = 5;
+const SOLO_PUBLIC_PROFILE_SCAN_LIMIT = 10;
 const pendingLuckyTickets = new Map();
 const recentLuckyTickets = new Map();
 const RECENT_TICKET_TTL_MS = 5 * 60 * 1000;
@@ -48,6 +50,20 @@ async function handler(req, res) {
   try {
     assertConfigured();
     if (req.method === 'GET') {
+      const action = sanitize(req.query && req.query.action, 40);
+      if (action === 'list_solo_profiles') {
+        let profiles;
+        try {
+          profiles = await listSoloPublicProfiles();
+        } catch {
+          throw publicServiceError('profile_list_unavailable', 503);
+        }
+        sendJson(res, 200, {
+          ok: true,
+          profiles
+        }, 'public, max-age=60, s-maxage=60, stale-while-revalidate=300');
+        return;
+      }
       sendJson(res, 200, {
         ok: true,
         service: 'wedding-invitation-api',
@@ -126,9 +142,9 @@ function isAllowedRequest(req) {
   return false;
 }
 
-function sendJson(res, status, value) {
+function sendJson(res, status, value, cacheControl = 'no-store') {
   res.status(status).setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Cache-Control', cacheControl);
   res.end(JSON.stringify(value));
 }
 
@@ -220,13 +236,52 @@ function parseStoredSoloApplication(file) {
   try {
     const record = JSON.parse(fromBase64(file.content));
     if (!record || !record.receivedAt || !record.application) return null;
+    const receivedAt = String(record.receivedAt);
+    if (!Number.isFinite(Date.parse(receivedAt))) return null;
     return {
-      receivedAt: String(record.receivedAt),
+      receivedAt,
       application: validateApplication(record.application)
     };
   } catch {
     return null;
   }
+}
+
+async function listSoloPublicProfiles() {
+  const commits = await github(`/commits?path=solo&per_page=${SOLO_PUBLIC_PROFILE_SCAN_LIMIT}`);
+  const candidates = Array.isArray(commits)
+    ? commits.map(item => {
+      const message = String(item && item.commit && item.commit.message || '').trim();
+      const date = String(item && item.commit && item.commit.author && item.commit.author.date || '');
+      const match = message.match(/^Add solo application ([A-Za-z0-9_-]{1,80})$/);
+      if (!match || !/^\d{4}-\d{2}-\d{2}T/.test(date)) return null;
+      return `solo/${date.slice(0, 10)}/${match[1]}.json`;
+    }).filter(Boolean)
+    : [];
+
+  const files = await Promise.all(candidates.map(path => getRepoFile(path)));
+
+  const seenApplicationIds = new Set();
+  return files
+    .map(parseStoredSoloApplication)
+    .filter(Boolean)
+    .sort((left, right) => Date.parse(right.receivedAt) - Date.parse(left.receivedAt))
+    .filter(({ application }) => {
+      if (seenApplicationIds.has(application.applicationId)) return false;
+      seenApplicationIds.add(application.applicationId);
+      return true;
+    })
+    .slice(0, SOLO_PUBLIC_PROFILE_LIMIT)
+    .map(({ application }) => ({
+      alias: application.alias || '신청자',
+      age: application.age,
+      job: application.job,
+      mbti: application.mbti,
+      gender: application.gender,
+      side: application.side,
+      intro: application.intro,
+      tagline: '행복한 인연을 기다리는'
+    }));
 }
 
 async function attemptSoloNotification(application, receivedAt) {
