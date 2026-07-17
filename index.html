@@ -962,6 +962,8 @@
       gap: 12px;
       overflow-x: auto;
       overflow-y: hidden;
+      cursor: grab;
+      touch-action: pan-x pan-y pinch-zoom;
       scroll-snap-type: x mandatory;
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
@@ -971,6 +973,12 @@
       position: relative;
       z-index: 1;
       overscroll-behavior-x: contain;
+    }
+    .solo-cards-wrap.is-dragging {
+      cursor: grabbing;
+      scroll-behavior: auto;
+      scroll-snap-type: none;
+      user-select: none;
     }
     .solo-cards-wrap::-webkit-scrollbar { display: none; }
 
@@ -1965,35 +1973,35 @@
 </section>
 
 <hr class="thin-line">
-<div class="section-rule" style="padding:20px 32px"><span>나는 solo</span></div>
+<div class="section-rule" style="padding:20px 32px"><span>내친소</span></div>
 <hr class="thin-line">
 
-<!-- ════ 나는 솔로 ════ -->
+<!-- ════ 내친소 ════ -->
 <section class="solo-sec" id="solo">
   <div class="solo-intro">
     <div style="position:relative;z-index:1">
       <div class="solo-logo reveal">
-        <span class="solo-naneun">나는</span>
-        <span class="solo-word">SOLO</span>
+        <span class="solo-naneun">내</span>
+        <span class="solo-word">친소</span>
       </div>
       <div class="solo-official reveal">Wedding Edition</div>
       <div class="solo-profile-panel">
-        <div class="solo-cards-label" id="solo-cards-label">신청자 프로필</div>
-        <div class="solo-cards-wrap" id="solo-cards"></div>
+        <div class="solo-cards-label" id="solo-cards-label">내친소 프로필</div>
+        <div class="solo-cards-wrap" id="solo-cards" tabindex="0" aria-label="내친소 프로필 슬라이드" aria-roledescription="carousel"></div>
       </div>
 
       <p class="solo-sub reveal">
-        결혼식장에서 특별한 자리를 마련해드릴께요.<br>
-        <strong>신랑·신부 지인이라면 남녀 누구나</strong><br>
+        결혼식장에서 특별한 자리를 마련해드릴게요.<br>
+        <strong>신랑·신부의 솔로 지인이라면 누구나</strong><br>
         좋은 인연을 찾고 싶다면 자기소개를 남겨주세요.<br>
-        행복한 인연을 만들어드릴께요.
+        행복한 인연을 만들어드릴게요.
       </p>
     </div>
   </div>
 
   <div class="solo-form-wrap">
     <div class="solo-form reveal">
-      <div class="solo-form-title">자기소개 신청</div>
+      <div class="solo-form-title">내친소 참여 신청</div>
       <div class="solo-form-sub">자세히 알려주실수록 좋은 분과 연결해드릴 수 있어요.<br>작성 후 아래의 버튼을 누르면 신청이 완료돼요.</div>
 
       <div class="fg-row">
@@ -2047,7 +2055,7 @@
 
       <button class="btn-solo" id="solo-submit-button" type="button" onclick="submitSolo()">
         <svg class="ui-icon" aria-hidden="true"><use href="#icon-check"></use></svg>
-        <span id="solo-submit-label">신청 완료하기</span>
+        <span id="solo-submit-label">내친소 신청하기</span>
       </button>
     </div>
   </div>
@@ -2682,6 +2690,12 @@ let soloCarouselResumeTimer = null;
 let soloCarouselIndex = 0;
 let soloCarouselVisible = false;
 let soloCarouselObserver = null;
+let soloDragState = null;
+const soloCarouselInteraction = {
+  touch: false,
+  focus: false,
+  hover: false
+};
 
 function getSoloCarouselCards() {
   return Array.from(document.querySelectorAll('#solo-cards .s-card'));
@@ -2720,14 +2734,100 @@ function stopSoloCarousel() {
 }
 
 function scheduleSoloCarouselResume() {
-  if (prefersReducedMotion || !soloCarouselVisible || document.hidden) return;
   clearTimeout(soloCarouselResumeTimer);
-  soloCarouselResumeTimer = setTimeout(startSoloCarousel, 3200);
+  if (prefersReducedMotion || !soloCarouselVisible || document.hidden || hasSoloCarouselInteraction()) return;
+  soloCarouselResumeTimer = setTimeout(() => {
+    if (!hasSoloCarouselInteraction()) startSoloCarousel();
+  }, 3200);
 }
 
 function pauseSoloCarousel() {
   soloCarouselIndex = getSoloCarouselIndex();
   stopSoloCarousel();
+  clearTimeout(soloCarouselResumeTimer);
+}
+
+function hasSoloCarouselInteraction() {
+  return Boolean(soloDragState)
+    || soloCarouselInteraction.touch
+    || soloCarouselInteraction.focus
+    || soloCarouselInteraction.hover;
+}
+
+function setSoloCarouselInteraction(type, isActive) {
+  soloCarouselInteraction[type] = isActive;
+  if (isActive) {
+    pauseSoloCarousel();
+  } else {
+    scheduleSoloCarouselResume();
+  }
+}
+
+function beginSoloCarouselDrag(event) {
+  if ((event.pointerType !== 'mouse' && event.pointerType !== 'pen') || event.button !== 0) return;
+
+  const box = document.getElementById('solo-cards');
+  if (!box) return;
+  if (event.preventDefault) event.preventDefault();
+  pauseSoloCarousel();
+  soloDragState = {
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startScrollLeft: box.scrollLeft,
+    moved: false
+  };
+  box.classList.add('is-dragging');
+  if (box.setPointerCapture) {
+    try { box.setPointerCapture(event.pointerId); } catch {}
+  }
+}
+
+function updateSoloCarouselDrag(event) {
+  if (!soloDragState || event.pointerId !== soloDragState.pointerId) return;
+
+  const box = document.getElementById('solo-cards');
+  if (!box) return;
+  const deltaX = event.clientX - soloDragState.startX;
+  if (!soloDragState.moved && Math.abs(deltaX) < 4) return;
+
+  soloDragState.moved = true;
+  event.preventDefault();
+  box.scrollLeft = soloDragState.startScrollLeft - deltaX;
+}
+
+function finishSoloCarouselDrag({ pointerId = null, snap = true, resume = true } = {}) {
+  const box = document.getElementById('solo-cards');
+  if (!box) return false;
+  const activeDrag = soloDragState;
+  if (!activeDrag) {
+    box.classList.remove('is-dragging');
+    return false;
+  }
+  if (pointerId !== null && pointerId !== activeDrag.pointerId) return false;
+
+  soloDragState = null;
+  box.classList.remove('is-dragging');
+  if (box.releasePointerCapture) {
+    try { box.releasePointerCapture(activeDrag.pointerId); } catch {}
+  }
+  if (snap) {
+    soloCarouselIndex = getSoloCarouselIndex();
+    moveSoloCarousel(soloCarouselIndex);
+  }
+  if (resume) scheduleSoloCarouselResume();
+  return true;
+}
+
+function endSoloCarouselDrag(event) {
+  finishSoloCarouselDrag({ pointerId: event.pointerId });
+}
+
+function handleSoloCarouselKey(event) {
+  if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+  event.preventDefault();
+  pauseSoloCarousel();
+  soloCarouselIndex = getSoloCarouselIndex();
+  moveSoloCarousel(soloCarouselIndex + (event.key === 'ArrowRight' ? 1 : -1));
   scheduleSoloCarouselResume();
 }
 
@@ -2736,18 +2836,29 @@ function bindSoloCarousel() {
   if (!box || box.dataset.carouselBound === 'true') return;
 
   box.dataset.carouselBound = 'true';
-  ['pointerdown', 'touchstart', 'focusin', 'mouseenter'].forEach(eventName => {
-    box.addEventListener(eventName, pauseSoloCarousel, { passive: true });
-  });
-  ['pointerup', 'touchend', 'focusout', 'mouseleave'].forEach(eventName => {
-    box.addEventListener(eventName, scheduleSoloCarouselResume, { passive: true });
-  });
+  box.addEventListener('pointerdown', beginSoloCarouselDrag, { passive: false });
+  box.addEventListener('pointermove', updateSoloCarouselDrag, { passive: false });
+  box.addEventListener('pointerup', endSoloCarouselDrag, { passive: true });
+  box.addEventListener('pointercancel', endSoloCarouselDrag, { passive: true });
+  box.addEventListener('lostpointercapture', endSoloCarouselDrag, { passive: true });
+  box.addEventListener('keydown', handleSoloCarouselKey);
+  box.addEventListener('touchstart', () => setSoloCarouselInteraction('touch', true), { passive: true });
+  box.addEventListener('touchend', () => setSoloCarouselInteraction('touch', false), { passive: true });
+  box.addEventListener('touchcancel', () => setSoloCarouselInteraction('touch', false), { passive: true });
+  box.addEventListener('mouseenter', () => setSoloCarouselInteraction('hover', true), { passive: true });
+  box.addEventListener('mouseleave', () => setSoloCarouselInteraction('hover', false), { passive: true });
+  box.addEventListener('focusin', () => setSoloCarouselInteraction('focus', true), { passive: true });
+  box.addEventListener('focusout', event => {
+    if (!event.relatedTarget || !box.contains(event.relatedTarget)) {
+      setSoloCarouselInteraction('focus', false);
+    }
+  }, { passive: true });
 }
 
 function startSoloCarousel() {
   const box = document.getElementById('solo-cards');
   const cards = getSoloCarouselCards();
-  if (!box || prefersReducedMotion || !soloCarouselVisible || document.hidden || cards.length < 2) {
+  if (!box || prefersReducedMotion || !soloCarouselVisible || document.hidden || hasSoloCarouselInteraction() || cards.length < 2) {
     stopSoloCarousel();
     return;
   }
@@ -2762,6 +2873,7 @@ function initSoloCarousel() {
   const box = document.getElementById('solo-cards');
   if (!box) return;
 
+  finishSoloCarouselDrag({ snap: false, resume: false });
   bindSoloCarousel();
   stopSoloCarousel();
   clearTimeout(soloCarouselResumeTimer);
@@ -2800,7 +2912,7 @@ function renderSoloCards() {
   const box = document.getElementById('solo-cards');
   const label = document.getElementById('solo-cards-label');
   const profiles = getSoloList();
-  if (label) label.textContent = '신청자 프로필';
+  if (label) label.textContent = '내친소 프로필';
   box.innerHTML = '';
   profiles.forEach(p => {
     const alias = escapeHtml(p.alias);
@@ -2811,13 +2923,13 @@ function renderSoloCards() {
     const side = escapeHtml(p.side);
     const intro = escapeHtml(p.intro);
     const tagline = escapeHtml(p.tagline);
-    const avatar = escapeHtml(p.avatar || 'SOLO');
+    const avatar = escapeHtml(p.avatar || '내친소');
     const c = document.createElement('div');
     c.className = 's-card';
     c.style.position = 'relative';
     c.innerHTML = `
       <div class="s-card-top">
-        <span class="s-show-logo">나는 <b>SOLO</b></span>
+        <span class="s-show-logo">내<b>친소</b></span>
         <span class="s-brand">${side}<br>Official</span>
       </div>
       <div class="s-card-body">
@@ -2914,7 +3026,7 @@ function setSoloSubmitPending(isPending) {
     button.setAttribute('aria-busy', isPending ? 'true' : 'false');
   }
   if (label) {
-    label.textContent = isPending ? '신청 접수 중' : '신청 완료하기';
+    label.textContent = isPending ? '신청 접수 중' : '내친소 신청하기';
   }
 }
 
@@ -2963,7 +3075,7 @@ async function submitSolo() {
   document.getElementById('s-contact').value = '';
   document.querySelectorAll('input[name="s-gender"], input[name="s-side"]').forEach(input => { input.checked = false; });
   syncRadioLabels();
-  showModal('icon-check','신청 완료','자기소개가 접수됐어요.\n결혼식장에서 좋은 분과 연결해드릴께요.');
+  showModal('icon-check','신청 완료','내친소 신청이 접수됐어요.\n결혼식장에서 좋은 분과 연결해드릴게요.');
 }
 document.getElementById('s-mbti').addEventListener('input', function(){ this.value=this.value.toUpperCase(); });
 
