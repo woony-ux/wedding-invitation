@@ -205,6 +205,138 @@ test('로컬 화면은 로컬 API를 사용해 운영 데이터 변경 없이 �
   assert.equal(vm.runInContext('WEDDING_API_ENDPOINT', context), '/api/wedding');
 });
 
+test('나는솔로 화면 브랜드는 디자인 구조를 유지한 내친소 문구로 표시한다', () => {
+  const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
+  const sectionStart = html.indexOf('<section class="solo-sec" id="solo">');
+  const sectionEnd = html.indexOf('<!-- ════ 엔딩 크레딧 ════ -->', sectionStart);
+  const section = html.slice(sectionStart, sectionEnd);
+
+  assert.ok(sectionStart > -1 && sectionEnd > sectionStart);
+  assert.match(section, /<span class="solo-naneun">내<\/span>/);
+  assert.match(section, /<span class="solo-word">친소<\/span>/);
+  assert.match(section, /내친소 프로필/);
+  assert.match(section, /내친소 참여 신청/);
+  assert.match(section, /내친소 신청하기/);
+  assert.doesNotMatch(section, /나는\s*<b>SOLO<\/b>|자기소개 신청|신청 완료하기/);
+});
+
+test('프로필 슬라이드는 마우스 드래그와 키보드 이동을 지원하고 터치 스와이프를 유지한다', () => {
+  const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
+  assert.match(html, /id="solo-cards"[^>]*tabindex="0"[^>]*aria-label="내친소 프로필 슬라이드"[^>]*aria-roledescription="carousel"/);
+  assert.match(html, /\.solo-cards-wrap\s*\{[\s\S]*?cursor:\s*grab;/);
+  assert.match(html, /\.solo-cards-wrap\s*\{[\s\S]*?touch-action:\s*pan-x pan-y pinch-zoom;/);
+  assert.match(html, /\.solo-cards-wrap\.is-dragging\s*\{[\s\S]*?cursor:\s*grabbing;/);
+
+  const start = html.indexOf('let soloCarouselTimer = null;');
+  const end = html.indexOf('function syncSoloCarousel()', start);
+  assert.ok(start > -1 && end > start);
+
+  const listeners = new Map();
+  const classes = new Set();
+  const timeouts = new Map();
+  let timeoutId = 0;
+  let intervalId = 0;
+  const box = {
+    dataset: {},
+    scrollLeft: 120,
+    clientWidth: 320,
+    classList: {
+      add: value => classes.add(value),
+      remove: value => classes.delete(value)
+    },
+    addEventListener(name, listener) { listeners.set(name, listener); },
+    contains() { return false; },
+    setPointerCapture() {},
+    releasePointerCapture() {},
+    scrollTo({ left }) { this.scrollLeft = left; }
+  };
+  const cards = [
+    { offsetLeft: 20, offsetWidth: 280 },
+    { offsetLeft: 312, offsetWidth: 280 },
+    { offsetLeft: 604, offsetWidth: 280 }
+  ];
+  const context = vm.createContext({
+    document: {
+      hidden: false,
+      getElementById: id => id === 'solo-cards' ? box : null,
+      querySelectorAll: selector => selector === '#solo-cards .s-card' ? cards : []
+    },
+    prefersReducedMotion: false,
+    setInterval: () => ++intervalId,
+    clearInterval() {},
+    setTimeout: callback => { const id = ++timeoutId; timeouts.set(id, callback); return id; },
+    clearTimeout: id => timeouts.delete(id)
+  });
+  vm.runInContext(html.slice(start, end), context);
+  vm.runInContext('soloCarouselVisible = true; bindSoloCarousel();', context);
+
+  let prevented = false;
+  let downPrevented = false;
+  listeners.get('pointerdown')({
+    pointerId: 7,
+    pointerType: 'mouse',
+    button: 0,
+    clientX: 100,
+    preventDefault() { downPrevented = true; }
+  });
+  assert.equal(downPrevented, true);
+  assert.equal(classes.has('is-dragging'), true);
+  assert.equal(vm.runInContext('soloCarouselTimer', context), null);
+  vm.runInContext('startSoloCarousel()', context);
+  assert.equal(vm.runInContext('soloCarouselTimer', context), null);
+  listeners.get('mouseleave')({});
+  assert.equal(timeouts.size, 0);
+  listeners.get('pointermove')({
+    pointerId: 7,
+    pointerType: 'mouse',
+    clientX: 40,
+    preventDefault() { prevented = true; }
+  });
+  assert.equal(prevented, true);
+  assert.equal(box.scrollLeft, 180);
+  listeners.get('pointerup')({ pointerId: 7, pointerType: 'mouse' });
+  assert.equal(classes.has('is-dragging'), false);
+  assert.equal(timeouts.size, 1);
+
+  box.scrollLeft = 0;
+  let keyPrevented = false;
+  listeners.get('keydown')({ key: 'ArrowRight', preventDefault() { keyPrevented = true; } });
+  assert.equal(keyPrevented, true);
+  assert.ok(box.scrollLeft > 0);
+
+  timeouts.clear();
+  listeners.get('pointerdown')({ pointerId: 8, pointerType: 'touch', button: 0, clientX: 100 });
+  assert.equal(classes.has('is-dragging'), false);
+  listeners.get('touchstart')({});
+  vm.runInContext('startSoloCarousel()', context);
+  assert.equal(vm.runInContext('soloCarouselTimer', context), null);
+  assert.equal(timeouts.size, 0);
+  listeners.get('touchend')({});
+  assert.equal(timeouts.size, 1);
+
+  timeouts.clear();
+  listeners.get('focusin')({});
+  vm.runInContext('startSoloCarousel()', context);
+  assert.equal(vm.runInContext('soloCarouselTimer', context), null);
+  listeners.get('focusout')({ relatedTarget: null });
+  assert.equal(timeouts.size, 1);
+
+  listeners.get('pointerdown')({ pointerId: 9, pointerType: 'mouse', button: 0, clientX: 100 });
+  listeners.get('lostpointercapture')({ pointerId: 99, pointerType: 'mouse' });
+  assert.equal(classes.has('is-dragging'), true);
+  assert.equal(vm.runInContext('soloDragState.pointerId', context), 9);
+  listeners.get('pointercancel')({ pointerId: 9, pointerType: 'mouse' });
+  assert.equal(classes.has('is-dragging'), false);
+  assert.equal(vm.runInContext('soloDragState', context), null);
+  listeners.get('lostpointercapture')({ pointerId: 9, pointerType: 'mouse' });
+  assert.equal(vm.runInContext('soloDragState', context), null);
+
+  listeners.get('pointerdown')({ pointerId: 10, pointerType: 'mouse', button: 0, clientX: 100 });
+  vm.runInContext('initSoloCarousel()', context);
+  assert.equal(classes.has('is-dragging'), false);
+  assert.equal(vm.runInContext('soloDragState', context), null);
+});
+
 test('나는솔로 응답이 끊긴 뒤 같은 내용을 재시도하면 같은 신청 ID를 유지한다', () => {
   const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
   const start = html.indexOf("const SOLO_PENDING_APPLICATION_KEY = 'wedding-solo-pending-application';");
