@@ -81,10 +81,9 @@ async () => {
     ['profile info', '.s-info'],
     ['profile mbti', '.s-mbti'],
     ['profile intro', '.s-intro'],
-    ['form title', '.solo-form-title'],
-    ['form copy', '.solo-form-sub'],
-    ['form label', '.fg-label'],
-    ['unselected radio', '.radio-option'],
+    ['profile section copy', '.solo-sub'],
+    ['profile section emphasis', '.solo-sub strong'],
+    ['carousel toggle', '#solo-carousel-toggle'],
     ['footer names', '.ft-names'],
     ['footer date', '.ft-date'],
     ['footer contact label', '.ft-contact-title'],
@@ -93,12 +92,6 @@ async () => {
     ['footer signoff', '.ft-copy']
   ];
   contrastTargets.forEach(([name, selector]) => checkContrast(name, document.querySelector(selector)));
-
-  const input = document.querySelector('#s-name');
-  input.value = '테스트';
-  input.focus();
-  checkContrast('typed form value', input);
-  input.value = '';
 
   const currentTicketDigit = document.querySelector('.ticket-reel-digit--current');
   checkContrast('ticket digit', currentTicketDigit, [255, 255, 255, 1]);

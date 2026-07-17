@@ -957,6 +957,27 @@
       padding: 0 0 14px;
       position: relative; z-index: 1;
     }
+    .solo-cards-heading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      position: relative;
+      z-index: 2;
+    }
+    .solo-carousel-toggle {
+      padding: 6px 10px;
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      color: rgba(250,248,255,.86);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .solo-carousel-toggle:focus-visible {
+      outline-color: #FFFFFF;
+    }
     .solo-cards-wrap {
       display: flex;
       gap: 12px;
@@ -1264,6 +1285,137 @@
     .btn-ticket:disabled::after,
     .btn-solo:disabled::after {
       display: none;
+    }
+
+    /* 내 친구는 솔로: 청첩장 문법과 분리된 친구 소개 화면 */
+    .solo-sec {
+      --solo-pink: #FF637D;
+      --solo-violet: #8B7CFF;
+      --solo-panel: #17141F;
+      --solo-card: #211D2A;
+      background:
+        radial-gradient(circle at 10% 12%, rgba(255,99,125,.2), transparent 34%),
+        radial-gradient(circle at 92% 40%, rgba(139,124,255,.2), transparent 36%),
+        #100E15;
+      color: #FAF8FF;
+    }
+    .solo-sec::before {
+      background:
+        radial-gradient(circle at 18% 16%, rgba(255,255,255,.08) 0 2px, transparent 3px),
+        radial-gradient(circle at 82% 70%, rgba(255,255,255,.06) 0 2px, transparent 3px);
+      background-size: 68px 68px, 92px 92px;
+    }
+    .solo-intro { padding: 56px 20px 64px; }
+    .solo-intro::before,
+    .solo-intro::after { display: none; }
+    .solo-logo { gap: 2px; margin-bottom: 16px; }
+    .solo-naneun {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 17px;
+      color: rgba(250,248,255,.72);
+      font-weight: 500;
+      letter-spacing: 4px;
+    }
+    .solo-word {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 58px;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: -4px;
+      line-height: 1.05;
+      text-shadow: 0 10px 34px rgba(255,99,125,.28);
+    }
+    .solo-official {
+      border-color: rgba(255,255,255,.18);
+      background: rgba(255,255,255,.06);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-style: normal;
+      font-size: 10px;
+      color: rgba(250,248,255,.72);
+      letter-spacing: 1.4px;
+    }
+    .solo-sub {
+      margin: 22px 0 28px;
+      color: rgba(250,248,255,.7);
+      font-size: 13px;
+      line-height: 1.85;
+    }
+    .solo-sub strong { color: #FFFFFF; font-weight: 600; font-size: 15px; }
+    .solo-profile-panel {
+      margin-top: 0;
+      padding: 2px;
+      border-radius: 28px;
+      background: var(--solo-panel);
+      isolation: isolate;
+    }
+    .solo-profile-panel::before {
+      content: '';
+      position: absolute;
+      z-index: -2;
+      inset: -80%;
+      background: conic-gradient(from 0deg, transparent 0 35%, var(--solo-pink) 44%, var(--solo-violet) 52%, transparent 62% 100%);
+      animation: solo-border-beam 5s linear infinite;
+    }
+    .solo-profile-panel::after {
+      content: '';
+      position: absolute;
+      z-index: -1;
+      inset: 2px;
+      border-radius: 26px;
+      background: var(--solo-panel);
+    }
+    @keyframes solo-border-beam { to { transform: rotate(1turn); } }
+    .solo-cards-label {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-style: normal;
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(250,248,255,.78);
+      letter-spacing: 1.2px;
+      padding: 18px 0 14px;
+    }
+    .solo-carousel-toggle { margin-top: 4px; }
+    .solo-cards-wrap { margin: 0; padding: 0 12px 14px; }
+    .s-card {
+      flex-basis: min(78vw, 326px);
+      width: min(78vw, 326px);
+      min-height: 208px;
+      border-radius: 22px;
+      background: linear-gradient(145deg, rgba(255,255,255,.05), transparent 48%), var(--solo-card);
+      color: #FAF8FF;
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 18px 38px rgba(0,0,0,.3);
+    }
+    .s-card::before { height: 4px; background: linear-gradient(90deg, var(--solo-pink), var(--solo-violet)); }
+    .s-card::after { display: none; }
+    .s-card-top { padding: 18px 18px 0; }
+    .s-show-logo {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-style: normal;
+      font-size: 11px;
+      color: rgba(250,248,255,.66);
+      letter-spacing: 0;
+    }
+    .s-show-logo b { color: var(--solo-pink); font-size: 11px; }
+    .s-brand { color: rgba(250,248,255,.54); font-size: 9px; }
+    .s-card-body { grid-template-columns: 58px 1fr; column-gap: 14px; padding: 14px 18px 22px; }
+    .s-avatar {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, rgba(255,99,125,.28), rgba(139,124,255,.34));
+      border: 1px solid rgba(255,255,255,.18);
+      color: #FFFFFF;
+      box-shadow: none;
+    }
+    .s-tagline { font-family: 'Noto Sans KR', sans-serif; color: rgba(250,248,255,.72); }
+    .s-tagline .hl { color: var(--solo-pink); font-weight: 600; }
+    .s-name { font-family: 'Noto Sans KR', sans-serif; color: #FFFFFF; font-size: 24px; font-weight: 700; }
+    .s-info { color: rgba(250,248,255,.72); }
+    .s-mbti { border-color: rgba(139,124,255,.55); color: #C7BFFF; background: rgba(139,124,255,.1); }
+    .s-intro { color: rgba(250,248,255,.78); }
+    @media (prefers-reduced-motion: reduce) {
+      .solo-profile-panel::before { animation: none; transform: rotate(20deg); }
     }
 
     /* ── 푸터 ──────────────────────────────────────── */
@@ -1973,90 +2125,30 @@
 </section>
 
 <hr class="thin-line">
-<div class="section-rule" style="padding:20px 32px"><span>내친소</span></div>
+<div class="section-rule" style="padding:20px 32px"><span>내 친구는 솔로</span></div>
 <hr class="thin-line">
 
-<!-- ════ 내친소 ════ -->
+<!-- ════ 내 친구는 솔로 ════ -->
 <section class="solo-sec" id="solo">
   <div class="solo-intro">
     <div style="position:relative;z-index:1">
       <div class="solo-logo reveal">
-        <span class="solo-naneun">내</span>
-        <span class="solo-word">친소</span>
+        <span class="solo-naneun">내 친구는</span>
+        <span class="solo-word">솔로</span>
       </div>
-      <div class="solo-official reveal">Wedding Edition</div>
-      <div class="solo-profile-panel">
-        <div class="solo-cards-label" id="solo-cards-label">내친소 프로필</div>
-        <div class="solo-cards-wrap" id="solo-cards" tabindex="0" aria-label="내친소 프로필 슬라이드" aria-roledescription="carousel"></div>
-      </div>
-
+      <div class="solo-official reveal">Friends we love, ready to meet</div>
       <p class="solo-sub reveal">
-        결혼식장에서 특별한 자리를 마련해드릴게요.<br>
-        <strong>신랑·신부의 솔로 지인이라면 누구나</strong><br>
-        좋은 인연을 찾고 싶다면 자기소개를 남겨주세요.<br>
-        행복한 인연을 만들어드릴게요.
+        <strong>신랑·신부가 소개하는 솔로 친구들</strong><br>
+        우리가 가장 잘 아는 친구의 매력을 직접 소개했어요.<br>
+        프로필을 옆으로 넘겨 만나보세요.
       </p>
-    </div>
-  </div>
-
-  <div class="solo-form-wrap">
-    <div class="solo-form reveal">
-      <div class="solo-form-title">내친소 참여 신청</div>
-      <div class="solo-form-sub">자세히 알려주실수록 좋은 분과 연결해드릴 수 있어요.<br>작성 후 아래의 버튼을 누르면 신청이 완료돼요.</div>
-
-      <div class="fg-row">
-        <div class="fg">
-          <label class="fg-label" for="s-name">이름 *</label>
-          <input class="fg-input" id="s-name" placeholder="홍길동" maxlength="10" autocomplete="name" required>
+      <div class="solo-profile-panel">
+        <div class="solo-cards-heading">
+          <div class="solo-cards-label" id="solo-cards-label">우리의 솔로 친구들</div>
+          <button class="solo-carousel-toggle" id="solo-carousel-toggle" type="button" aria-pressed="false">자동 넘김 멈추기</button>
         </div>
-        <div class="fg">
-          <label class="fg-label" for="s-age">나이 *</label>
-          <input class="fg-input" id="s-age" type="number" placeholder="28" min="20" max="55" step="1" inputmode="numeric" required>
-        </div>
+        <div class="solo-cards-wrap" id="solo-cards" tabindex="0" aria-label="내 친구는 솔로 프로필 슬라이드" aria-roledescription="carousel"></div>
       </div>
-
-      <div class="fg-row">
-        <div class="fg">
-          <label class="fg-label" for="s-job">직업 *</label>
-          <input class="fg-input" id="s-job" placeholder="회사원" maxlength="20" autocomplete="organization-title" required>
-        </div>
-        <div class="fg">
-          <label class="fg-label" for="s-mbti">MBTI</label>
-          <input class="fg-input" id="s-mbti" placeholder="ENFP" maxlength="4" autocapitalize="characters">
-        </div>
-      </div>
-
-      <div class="fg">
-        <label class="fg-label">성별 *</label>
-        <div class="radio-group">
-          <label class="radio-label"><input type="radio" name="s-gender" value="남성"><span class="radio-option">남성</span></label>
-          <label class="radio-label"><input type="radio" name="s-gender" value="여성"><span class="radio-option">여성</span></label>
-        </div>
-      </div>
-
-      <div class="fg">
-        <label class="fg-label">신랑측 / 신부측 *</label>
-        <div class="radio-group">
-          <label class="radio-label"><input type="radio" name="s-side" value="신랑측"><span class="radio-option">신랑측</span></label>
-          <label class="radio-label"><input type="radio" name="s-side" value="신부측"><span class="radio-option">신부측</span></label>
-        </div>
-      </div>
-
-      <div class="fg">
-        <label class="fg-label" for="s-intro">한줄 자기소개 *</label>
-        <textarea class="fg-textarea" id="s-intro"
-          placeholder="저는 ___한 사람이에요. 이런 분을 찾고 있어요" maxlength="150" required></textarea>
-      </div>
-
-      <div class="fg">
-        <label class="fg-label" for="s-contact">연락처 (선택 · 신랑신부에게만)</label>
-        <input class="fg-input" id="s-contact" type="tel" placeholder="010-0000-0000" autocomplete="tel">
-      </div>
-
-      <button class="btn-solo" id="solo-submit-button" type="button" onclick="submitSolo()">
-        <svg class="ui-icon" aria-hidden="true"><use href="#icon-check"></use></svg>
-        <span id="solo-submit-label">내친소 신청하기</span>
-      </button>
     </div>
   </div>
 </section>
@@ -2637,20 +2729,7 @@ function normalizeSoloPublicProfile(profile) {
 }
 
 function getSoloList() {
-  const seen = new Set();
-  const sourceProfiles = soloServerProfilesLoaded
-    ? [...soloSessionProfiles, ...soloServerProfiles]
-    : getStoredSoloApplications();
-  const applications = sourceProfiles
-    .filter(profile => {
-      const fingerprint = soloProfileFingerprint(profile);
-      if (!fingerprint || seen.has(fingerprint)) return false;
-      seen.add(fingerprint);
-      return true;
-    })
-    .slice(0, SOLO_VISIBLE_PROFILE_LIMIT);
-  const dummyCount = Math.max(0, SOLO_VISIBLE_PROFILE_LIMIT - applications.length);
-  return [...applications, ...DUMMY_PROFILES.slice(0, dummyCount)].map((profile, index) => ({
+  return DUMMY_PROFILES.slice(0, SOLO_VISIBLE_PROFILE_LIMIT).map((profile, index) => ({
     ...profile,
     alias: profile.alias || createSoloAlias(index),
     avatar: `No. ${String(index + 1).padStart(2, '0')}`
@@ -2691,6 +2770,7 @@ let soloCarouselIndex = 0;
 let soloCarouselVisible = false;
 let soloCarouselObserver = null;
 let soloDragState = null;
+let soloCarouselPausedByUser = false;
 const soloCarouselInteraction = {
   touch: false,
   focus: false,
@@ -2858,7 +2938,7 @@ function bindSoloCarousel() {
 function startSoloCarousel() {
   const box = document.getElementById('solo-cards');
   const cards = getSoloCarouselCards();
-  if (!box || prefersReducedMotion || !soloCarouselVisible || document.hidden || hasSoloCarouselInteraction() || cards.length < 2) {
+  if (!box || prefersReducedMotion || soloCarouselPausedByUser || !soloCarouselVisible || document.hidden || hasSoloCarouselInteraction() || cards.length < 2) {
     stopSoloCarousel();
     return;
   }
@@ -2867,6 +2947,17 @@ function startSoloCarousel() {
   soloCarouselTimer = setInterval(() => {
     moveSoloCarousel(soloCarouselIndex + 1);
   }, 2600);
+}
+
+function toggleSoloCarousel() {
+  const button = document.getElementById('solo-carousel-toggle');
+  soloCarouselPausedByUser = !soloCarouselPausedByUser;
+  if (button) {
+    button.setAttribute('aria-pressed', soloCarouselPausedByUser ? 'true' : 'false');
+    button.textContent = soloCarouselPausedByUser ? '자동 넘김 시작하기' : '자동 넘김 멈추기';
+  }
+  if (soloCarouselPausedByUser) stopSoloCarousel();
+  else syncSoloCarousel();
 }
 
 function initSoloCarousel() {
@@ -2912,9 +3003,9 @@ function renderSoloCards() {
   const box = document.getElementById('solo-cards');
   const label = document.getElementById('solo-cards-label');
   const profiles = getSoloList();
-  if (label) label.textContent = '내친소 프로필';
+  if (label) label.textContent = '우리의 솔로 친구들';
   box.innerHTML = '';
-  profiles.forEach(p => {
+  profiles.forEach((p, index) => {
     const alias = escapeHtml(p.alias);
     const age = escapeHtml(p.age);
     const gender = escapeHtml(p.gender);
@@ -2923,14 +3014,16 @@ function renderSoloCards() {
     const side = escapeHtml(p.side);
     const intro = escapeHtml(p.intro);
     const tagline = escapeHtml(p.tagline);
-    const avatar = escapeHtml(p.avatar || '내친소');
+    const avatar = escapeHtml(p.avatar || 'SOLO');
     const c = document.createElement('div');
     c.className = 's-card';
     c.style.position = 'relative';
+    c.setAttribute('role', 'group');
+    c.setAttribute('aria-label', `프로필 ${index + 1} / ${profiles.length}`);
     c.innerHTML = `
       <div class="s-card-top">
-        <span class="s-show-logo">내<b>친소</b></span>
-        <span class="s-brand">${side}<br>Official</span>
+        <span class="s-show-logo">내 친구는 <b>솔로</b></span>
+        <span class="s-brand">${side}<br>친구 소개</span>
       </div>
       <div class="s-card-body">
         <div class="s-avatar">${avatar}</div>
@@ -2945,8 +3038,8 @@ function renderSoloCards() {
   initSoloCarousel();
 }
 renderSoloCards();
-loadSoloProfiles();
 initSoloCarouselVisibility();
+document.getElementById('solo-carousel-toggle')?.addEventListener('click', toggleSoloCarousel);
 
 const SOLO_SUBMISSION_ENDPOINT = WEDDING_API_ENDPOINT;
 const SOLO_PENDING_APPLICATION_KEY = 'wedding-solo-pending-application';
@@ -3029,55 +3122,6 @@ function setSoloSubmitPending(isPending) {
     label.textContent = isPending ? '신청 접수 중' : '내친소 신청하기';
   }
 }
-
-async function submitSolo() {
-  if (soloSubmitting) return;
-
-  const name    = document.getElementById('s-name').value.trim();
-  const age     = Number(document.getElementById('s-age').value);
-  const job     = document.getElementById('s-job').value.trim();
-  const mbti    = document.getElementById('s-mbti').value.trim().toUpperCase();
-  const intro   = document.getElementById('s-intro').value.trim();
-  const contact = document.getElementById('s-contact').value.trim();
-  const gEl     = document.querySelector('input[name="s-gender"]:checked');
-  const sEl     = document.querySelector('input[name="s-side"]:checked');
-  if (!name||!age||!job||!intro||!gEl||!sEl) { alert('필수 항목을 모두 입력해주세요!'); return; }
-  if (!Number.isInteger(age)||age<20||age>55) { alert('나이를 다시 확인해주세요!'); return; }
-  const draft = {
-    name, age, job, mbti, gender:gEl.value, side:sEl.value, intro, contact,
-    alias: createSoloAlias(getStoredSoloApplications().length),
-    tagline: '행복한 인연을 기다리는',
-    source: 'wedding-invitation'
-  };
-  const newP = getOrCreatePendingSoloApplication(draft);
-
-  try {
-    setSoloSubmitPending(true);
-    await sendSoloApplication(newP);
-  } catch (error) {
-    console.error(error);
-    showModal('icon-message','신청을 완료하지 못했어요','잠시 후 다시 시도해주세요.');
-    return;
-  } finally {
-    setSoloSubmitPending(false);
-  }
-
-  const savedApplication = saveSoloApplication(newP);
-  const sessionProfile = normalizeSoloPublicProfile(savedApplication);
-  if (sessionProfile) soloSessionProfiles = [sessionProfile, ...soloSessionProfiles];
-  clearPendingSoloApplication(draft, newP.id);
-  renderSoloCards();
-  document.getElementById('s-name').value = '';
-  document.getElementById('s-age').value = '';
-  document.getElementById('s-job').value = '';
-  document.getElementById('s-mbti').value = '';
-  document.getElementById('s-intro').value = '';
-  document.getElementById('s-contact').value = '';
-  document.querySelectorAll('input[name="s-gender"], input[name="s-side"]').forEach(input => { input.checked = false; });
-  syncRadioLabels();
-  showModal('icon-check','신청 완료','내친소 신청이 접수됐어요.\n결혼식장에서 좋은 분과 연결해드릴게요.');
-}
-document.getElementById('s-mbti').addEventListener('input', function(){ this.value=this.value.toUpperCase(); });
 
 /* ── 모달 ────────────────────────────────────────── */
 function iconMarkup(iconId, className = 'ui-icon') {
