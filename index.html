@@ -3127,7 +3127,7 @@ function accountCopyText(btn){
   const row = btn.closest('.acc-row');
   const bankAndNumber = row.querySelector('.acc-bank').textContent.trim();
   const accountHolder = row.querySelector('.acc-name').textContent.trim();
-  return bankAndNumber + ' 예금주 ' + accountHolder;
+  return bankAndNumber + ' ' + accountHolder;
 }
 async function copyAcc(btn){
   const account = accountCopyText(btn);
