@@ -2121,7 +2121,7 @@ window.setTimeout(releaseFilmIntroScrollLock, 4500);
             <span class="acc-name">함상구</span>
             <span class="acc-bank">국민은행 246-21-0264-767</span>
           </div>
-          <button class="acc-copy" type="button" onclick="copyAcc(this,'246210264767')">복사</button>
+          <button class="acc-copy" type="button" onclick="copyAcc(this)">복사</button>
         </div>
         <div class="acc-row">
           <div class="acc-info">
@@ -2129,7 +2129,7 @@ window.setTimeout(releaseFilmIntroScrollLock, 4500);
             <span class="acc-name">김미선</span>
             <span class="acc-bank">카카오뱅크 3333-15-4447217</span>
           </div>
-          <button class="acc-copy" type="button" onclick="copyAcc(this,'3333154447217')">복사</button>
+          <button class="acc-copy" type="button" onclick="copyAcc(this)">복사</button>
         </div>
         <div class="acc-row">
           <div class="acc-info">
@@ -2137,7 +2137,7 @@ window.setTimeout(releaseFilmIntroScrollLock, 4500);
             <span class="acc-name">함정훈</span>
             <span class="acc-bank">카카오뱅크 3333-03-8967900</span>
           </div>
-          <button class="acc-copy" type="button" onclick="copyAcc(this,'3333038967900')">복사</button>
+          <button class="acc-copy" type="button" onclick="copyAcc(this)">복사</button>
         </div>
       </div>
     </div>
@@ -2152,7 +2152,7 @@ window.setTimeout(releaseFilmIntroScrollLock, 4500);
             <span class="acc-name">고현숙</span>
             <span class="acc-bank">하나은행 238-910025-37908</span>
           </div>
-          <button class="acc-copy" type="button" onclick="copyAcc(this,'23891002537908')">복사</button>
+          <button class="acc-copy" type="button" onclick="copyAcc(this)">복사</button>
         </div>
         <div class="acc-row">
           <div class="acc-info">
@@ -2160,7 +2160,7 @@ window.setTimeout(releaseFilmIntroScrollLock, 4500);
             <span class="acc-name">박운진</span>
             <span class="acc-bank">토스뱅크 1000-0001-7880</span>
           </div>
-          <button class="acc-copy" type="button" onclick="copyAcc(this,'1000000117880')">복사</button>
+          <button class="acc-copy" type="button" onclick="copyAcc(this)">복사</button>
         </div>
       </div>
     </div>
@@ -3123,7 +3123,14 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape')closeModal(
 <script>
 /* ── 계좌 아코디언 · 복사 ─────────────────────────── */
 function toggleAcc(btn){ btn.closest('.acc-group').classList.toggle('open'); }
-async function copyAcc(btn, number){
+function accountCopyText(btn){
+  const row = btn.closest('.acc-row');
+  const bankAndNumber = row.querySelector('.acc-bank').textContent.trim();
+  const accountHolder = row.querySelector('.acc-name').textContent.trim();
+  return bankAndNumber + ' 예금주 ' + accountHolder;
+}
+async function copyAcc(btn){
+  const account = accountCopyText(btn);
   const done = function(){
     btn.textContent = '복사됨';
     btn.classList.add('copied');
@@ -3135,17 +3142,17 @@ async function copyAcc(btn, number){
     showModal(
       'icon-message',
       '계좌번호를 복사하지 못했어요',
-      number + '\n길게 눌러 직접 복사해 주세요.'
+      account + '\n길게 눌러 직접 복사해 주세요.'
     );
   };
   if (navigator.clipboard && navigator.clipboard.writeText) {
     try {
-      await navigator.clipboard.writeText(number);
+      await navigator.clipboard.writeText(account);
       done();
       return;
     } catch(e) {}
   }
-  if (fallbackCopy(number)) done();
+  if (fallbackCopy(account)) done();
   else failed();
 }
 function fallbackCopy(text){
