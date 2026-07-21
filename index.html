@@ -3123,22 +3123,49 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape')closeModal(
 <script>
 /* ── 계좌 아코디언 · 복사 ─────────────────────────── */
 function toggleAcc(btn){ btn.closest('.acc-group').classList.toggle('open'); }
-function copyAcc(btn, number){
+async function copyAcc(btn, number){
   const done = function(){
     btn.textContent = '복사됨';
     btn.classList.add('copied');
     setTimeout(function(){ btn.textContent = '복사'; btn.classList.remove('copied'); }, 1500);
   };
+  const failed = function(){
+    btn.textContent = '다시 복사';
+    btn.classList.remove('copied');
+    showModal(
+      'icon-message',
+      '계좌번호를 복사하지 못했어요',
+      number + '\n길게 눌러 직접 복사해 주세요.'
+    );
+  };
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(number).then(done).catch(function(){ fallbackCopy(number, done); });
-  } else { fallbackCopy(number, done); }
+    try {
+      await navigator.clipboard.writeText(number);
+      done();
+      return;
+    } catch(e) {}
+  }
+  if (fallbackCopy(number)) done();
+  else failed();
 }
-function fallbackCopy(text, cb){
+function fallbackCopy(text){
   const ta = document.createElement('textarea');
-  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-  document.body.appendChild(ta); ta.focus(); ta.select();
-  try { document.execCommand('copy'); } catch(e){}
-  document.body.removeChild(ta); cb();
+  ta.value = text;
+  ta.setAttribute('readonly', '');
+  ta.style.position = 'fixed';
+  ta.style.top = '0';
+  ta.style.left = '0';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  if (ta.setSelectionRange) ta.setSelectionRange(0, text.length);
+  let copied = false;
+  try {
+    copied = typeof document.execCommand === 'function' && document.execCommand('copy') === true;
+  } catch(e) {}
+  document.body.removeChild(ta);
+  return copied;
 }
 </script>
 
