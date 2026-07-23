@@ -1672,10 +1672,7 @@ function releaseFilmIntroScrollLock() {
   }
 }
 
-filmIntro.addEventListener('click', () => {
-  filmIntro.classList.add('hide');
-  window.setTimeout(releaseFilmIntroScrollLock, 550);
-});
+filmIntro.addEventListener('click', releaseFilmIntroScrollLock);
 filmIntro.addEventListener('animationend', event => {
   if (event.animationName === 'introFade') releaseFilmIntroScrollLock();
 });
