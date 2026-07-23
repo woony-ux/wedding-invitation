@@ -271,6 +271,7 @@ test('스플래시가 끝날 때까지 문서 스크롤을 잠근다', () => {
   assert.match(html, /filmIntro\.hidden = true/);
   assert.match(html, /initialFilmIntroHash/);
   assert.match(html, /target\.scrollIntoView\(\{ block: 'start' \}\)/);
+  assert.match(html, /filmIntro\.addEventListener\('click', releaseFilmIntroScrollLock\)/);
   assert.match(html, /filmIntro\.addEventListener\('animationend'/);
   assert.match(html, /filmIntro\.addEventListener\('transitionend'/);
 });
