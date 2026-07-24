@@ -262,13 +262,18 @@ async function listSoloPublicProfiles() {
   const files = await Promise.all(candidates.map(path => getRepoFile(path)));
 
   const seenApplicationIds = new Set();
+  const seenAliases = new Set();
   return files
     .map(parseStoredSoloApplication)
     .filter(Boolean)
+    .filter(({ application }) => !isKnownFakeSoloApplication(application))
     .sort((left, right) => Date.parse(right.receivedAt) - Date.parse(left.receivedAt))
     .filter(({ application }) => {
       if (seenApplicationIds.has(application.applicationId)) return false;
       seenApplicationIds.add(application.applicationId);
+      const alias = String(application.alias || '신청자').trim().toLocaleLowerCase('ko-KR');
+      if (seenAliases.has(alias)) return false;
+      seenAliases.add(alias);
       return true;
     })
     .slice(0, SOLO_PUBLIC_PROFILE_LIMIT)
@@ -282,6 +287,14 @@ async function listSoloPublicProfiles() {
       intro: application.intro,
       tagline: '행복한 인연을 기다리는'
     }));
+}
+
+function isKnownFakeSoloApplication(application) {
+  return application
+    && application.alias === '영수'
+    && application.age === 24
+    && application.job === '개발자'
+    && application.mbti === 'INTJ';
 }
 
 async function attemptSoloNotification(application, receivedAt) {
