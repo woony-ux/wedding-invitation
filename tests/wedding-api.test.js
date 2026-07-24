@@ -284,6 +284,11 @@ test('스플래시가 끝날 때까지 문서 스크롤을 잠근다', () => {
   assert.match(html, /filmIntro\.addEventListener\('transitionend'/);
 });
 
+test('럭키넘버 슬롯은 현재 숫자만 선명하게 표시한다', () => {
+  const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
+  assert.match(html, /\.ticket-reel-digit--prev,\s*\.ticket-reel-digit--next\s*\{[\s\S]*?opacity:\s*0;/);
+});
+
 test('프로필 슬라이드는 마우스 드래그와 키보드 이동을 지원하고 터치 스와이프를 유지한다', () => {
   const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
   assert.match(html, /id="solo-cards"[^>]*tabindex="0"[^>]*aria-label="내 친구는 솔로 프로필 슬라이드"[^>]*aria-roledescription="carousel"/);
