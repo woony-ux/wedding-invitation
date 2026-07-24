@@ -2685,6 +2685,7 @@ window.addEventListener('storage', event => {
 
 /* ── 나는 솔로 ───────────────────────────────────── */
 const SOLO_VISIBLE_PROFILE_LIMIT = 5;
+const SOLO_PROFILE_CACHE_VERSION = '20260724';
 const DUMMY_PROFILES = [
   { alias:'영식', age:31, job:'건축가',  mbti:'ISTP', gender:'남성', side:'신랑측',
     intro:'디테일에 강하고 손재주 있어요. 카페투어 좋아해요',
@@ -2722,9 +2723,22 @@ function normalizeSoloPublicProfile(profile) {
   return normalized;
 }
 
+function isKnownFakeSoloProfile(profile) {
+  return profile
+    && profile.alias === '영수'
+    && profile.age === 24
+    && profile.job === '개발자'
+    && profile.mbti === 'INTJ';
+}
+
 function getSoloList() {
   const submittedProfiles = soloServerProfilesLoaded
-    ? soloServerProfiles.slice(0, SOLO_VISIBLE_PROFILE_LIMIT)
+    ? soloServerProfiles
+      .filter(profile => !isKnownFakeSoloProfile(profile))
+      .filter((profile, index, profiles) => profiles.findIndex(candidate => (
+        candidate.alias.toLocaleLowerCase('ko-KR') === profile.alias.toLocaleLowerCase('ko-KR')
+      )) === index)
+      .slice(0, SOLO_VISIBLE_PROFILE_LIMIT)
     : [];
   const dummyCount = Math.max(0, SOLO_VISIBLE_PROFILE_LIMIT - submittedProfiles.length);
   return [...submittedProfiles, ...DUMMY_PROFILES.slice(0, dummyCount)].map((profile, index) => ({
@@ -2738,7 +2752,8 @@ async function loadSoloProfiles() {
   if (!WEDDING_API_ENDPOINT) return false;
   try {
     const separator = WEDDING_API_ENDPOINT.includes('?') ? '&' : '?';
-    const response = await fetch(`${WEDDING_API_ENDPOINT}${separator}action=list_solo_profiles`, {
+    const response = await fetch(`${WEDDING_API_ENDPOINT}${separator}action=list_solo_profiles&v=${SOLO_PROFILE_CACHE_VERSION}`, {
+      cache: 'no-store',
       headers: { 'Accept': 'application/json' }
     });
     if (!response.ok) return false;
